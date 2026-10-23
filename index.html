@@ -1,0 +1,1632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Pick the winners of the 16 most competitive 2026 Senate races, with live polls, polling averages and Polymarket odds.">
+<meta property="og:title" content="Senate Pick'em 2026">
+<meta property="og:description" content="Call the 16 most competitive 2026 Senate races. Live polls, averages and Polymarket odds.">
+<meta name="theme-color" content="#2152E0">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Senate Pick'em 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=Silkscreen&display=swap">
+<style>
+/* Layout: clean white app shell. A matchup board split into one tinted column per candidate (hero on top, scouting report below), arrows on the outer edges, poll board full width underneath. 16-bit accents: pixel knights, pixel micro-labels, segmented meters. */
+/* Single deliberate look on white, as requested: every color is set explicitly, no dark variant. */
+:root{
+  --bg:#FFFFFF; --ink:#12141C; --ink-2:#454A5C; --mute:#767B8E; --line:#E5E7EF; --soft:#F6F7FB;
+  --d:#2152E0; --d-ink:#1A3FAE; --d-tint:#F3F6FF; --d-tint2:#E4ECFF;
+  --r:#DC2F3A; --r-ink:#A3202A; --r-tint:#FFF5F5; --r-tint2:#FFE4E5;
+  --i:#E6A800; --i-ink:#7A5800; --i-tint:#FFFAEA; --i-tint2:#FFEFC0;
+  --good:#1E8A4C; --bad:#C2333D;
+  --display:"Bricolage Grotesque", "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --pixel:"Silkscreen", ui-monospace, Menlo, Consolas, monospace;
+  --r-lg:22px; --r-md:14px; --r-sm:10px;
+  --shadow:0 1px 2px rgba(18,20,28,.05), 0 10px 30px rgba(18,20,28,.08);
+  --shadow-sm:0 1px 2px rgba(18,20,28,.06), 0 4px 12px rgba(18,20,28,.06);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 40px}
+.app{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,a:focus-visible{outline:3px solid var(--d);outline-offset:3px;border-radius:8px}
+a{color:var(--d-ink);text-underline-offset:3px}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.px{font-family:var(--pixel);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+
+/* ---------- HUD ---------- */
+.hud{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-block:18px;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;text-align:left}
+.logo canvas{width:28px;height:21px}
+.logo .wm{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em;line-height:1}
+.logo .yr{display:block;font-family:var(--pixel);font-size:10px;color:var(--mute);margin-top:3px}
+.pips{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0;justify-content:center}
+.pip{min-width:34px;height:24px;padding:0 4px;border-radius:7px;background:var(--soft);border:1px solid var(--line);
+  font-family:var(--pixel);font-size:9px;color:var(--ink-2);display:grid;place-items:center;transition:transform .15s}
+.pip:hover{transform:translateY(-1px);border-color:#C9CCD8}
+.pip.D{background:var(--d);border-color:var(--d);color:#fff}
+.pip.R{background:var(--r);border-color:var(--r);color:#fff}
+.pip.I{background:var(--i);border-color:var(--i);color:var(--ink)}
+.pip.cur{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.hud-right{display:flex;gap:12px;align-items:center}
+.count{font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.datastat{font-size:12px;font-weight:600;padding:4px 10px 4px 22px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap;position:relative}
+.datastat::before{content:"";position:absolute;left:9px;top:50%;width:7px;height:7px;margin-top:-3.5px;background:#9AA0AA}
+.datastat.live::before{background:#1E8A4C;animation:pulse 2s steps(2) infinite}.datastat.partial::before{background:#E6A800}.datastat.offline::before{background:#C2333D}.datastat.loading::before{background:#2152E0;animation:pulse .6s steps(2) infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (max-width:720px){.datastat{font-size:11px}}
+.count b{color:var(--ink)}
+.iconbtn{height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center}
+.iconbtn:hover{background:var(--soft)}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 22px;border-radius:999px;font-weight:700;font-size:16px;
+  background:var(--ink);color:#fff;box-shadow:var(--shadow-sm);transition:transform .12s, box-shadow .12s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{background:rgba(18,20,28,.35);color:rgba(255,255,255,.9);box-shadow:none;cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.btn .px{font-size:10px;opacity:.75}
+
+/* ---------- Title ---------- */
+.title{border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.title .copy{padding:48px 44px;display:flex;flex-direction:column;gap:18px;justify-content:center}
+.title h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,6vw,68px);line-height:.95;letter-spacing:-.03em;margin:0;text-wrap:balance}
+.title h1 .d{color:var(--d)}.title h1 .r{color:var(--r)}
+.title p{margin:0;color:var(--ink-2);font-size:18px;max-width:44ch}
+.title .eyebrow{color:var(--mute)}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap}
+.keys{font-size:14px;color:var(--mute)}
+kbd{font-family:var(--pixel);font-size:10px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;background:var(--soft);color:var(--ink-2)}
+.stage{position:relative;background:linear-gradient(90deg,var(--d-tint2),var(--i-tint2) 50%,var(--r-tint2));display:flex;align-items:flex-end;justify-content:center;gap:18px;padding:40px 24px 0;min-height:300px}
+.stage canvas{width:110px;height:auto}
+.stage .ground{position:absolute;left:0;right:0;bottom:0;height:22px;background:
+  repeating-linear-gradient(90deg,rgba(18,20,28,.10) 0 8px,rgba(18,20,28,.04) 8px 16px)}
+.stage .knight{position:relative;z-index:1;margin-bottom:14px}
+
+/* ---------- Race ---------- */
+.race{display:flex;flex-direction:column;gap:16px}
+.race-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.stage-no{color:var(--mute)}
+.state{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,42px);line-height:1;letter-spacing:-.02em;margin:0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.state .abbr{font-family:var(--pixel);font-size:14px;font-weight:400;letter-spacing:.06em;padding:6px 8px;border-radius:8px;background:var(--ink);color:#fff}
+.tagline{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tag{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--ink-2)}
+.note{margin:0;max-width:72ch;color:var(--ink-2);font-size:15px;line-height:1.45;text-wrap:pretty}
+
+.arena{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;gap:16px;align-items:start}
+.arrow{position:sticky;top:calc(50vh - 26px);margin-top:150px;width:52px;height:52px;border-radius:50%;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow-sm);display:grid;place-items:center;transition:transform .12s, box-shadow .12s}
+.arrow:hover{transform:scale(1.06);box-shadow:var(--shadow)}
+.arrow[disabled]{opacity:.3;cursor:default;transform:none}
+.arrow svg{width:12px;height:16px}
+
+.split{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.col{--pc:var(--i);--pi:var(--i-ink);--pt:var(--i-tint);--pt2:var(--i-tint2)}
+.col.D{--pc:var(--d);--pi:var(--d-ink);--pt:var(--d-tint);--pt2:var(--d-tint2)}
+.col.R{--pc:var(--r);--pi:var(--r-ink);--pt:var(--r-tint);--pt2:var(--r-tint2)}
+.hero,.scout{min-width:0}
+.hero{position:relative;background:linear-gradient(180deg,var(--pt2),var(--pt));padding:46px 26px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;border-top:5px solid var(--pc)}
+.scout{background:var(--pt);padding:4px 26px 28px;display:flex;flex-direction:column;gap:14px}
+.split .col:not(.c0){border-left:1px solid rgba(18,20,28,.08)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.chip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--pc);color:#fff}
+.col.I .chip{color:var(--ink)}
+.chip.out{background:rgba(255,255,255,.75);color:var(--ink-2);border:1px solid rgba(18,20,28,.12);font-weight:600}
+.sprite{position:relative;width:160px}
+.sprite canvas{width:160px;height:auto;transition:filter .2s, opacity .2s}
+.hero h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.stats{width:100%;display:flex;flex-direction:column;gap:8px}
+.stat{background:rgba(255,255,255,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.7);border-radius:var(--r-md);padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.stat .k{color:var(--ink-2);font-size:10px}
+.stat.main{align-items:center;text-align:center;padding:14px 14px 12px}
+.stat.main .v{font-family:var(--display);font-weight:800;font-size:52px;line-height:.95;color:var(--pi);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.stat.main .v small{font-size:.45em;font-weight:700}
+.stat.main .lead{font-size:12px;font-weight:700;color:var(--pi)}
+.avgtrack{width:100%;height:10px;border-radius:5px;background:rgba(18,20,28,.1);position:relative;overflow:hidden}
+.avgtrack i{position:absolute;inset:0 auto 0 0;border-radius:5px;background:var(--pc)}
+.avgtrack b{position:absolute;top:-2px;bottom:-2px;left:50%;width:2px;background:rgba(18,20,28,.45)}
+.stat.sub{flex-direction:row;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.3)}
+.stat.sub .k{flex:none}
+.stat.sub .v2{flex:none;font-weight:700;font-size:15px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:3ch;text-align:right}
+.segs{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;flex:1;min-width:0}
+.segs i{height:6px;border-radius:1px;background:rgba(18,20,28,.1)}
+.segs i.on{background:var(--pc);opacity:.75}
+.pick{width:100%;height:52px;border-radius:var(--r-md);background:var(--pc);color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 16px -6px var(--pc);transition:transform .12s, filter .12s}
+.col.I .pick{color:var(--ink)}
+.pick:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.pick:active{transform:translateY(1px)}
+.pick kbd{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.35);color:inherit}
+.col.chosen .hero{box-shadow:inset 0 0 0 3px var(--pc)}
+.col.chosen .pick{background:#fff;color:var(--pi);box-shadow:inset 0 0 0 2px var(--pc)}
+.col.chosen .pick .off{display:none}
+.col.chosen .pick:hover .on,.col.chosen .pick:focus-visible .on{display:none}
+.col.chosen .pick:hover .off,.col.chosen .pick:focus-visible .off{display:inline}
+.col.chosen .pick:hover{background:#fff;filter:none;box-shadow:inset 0 0 0 2px var(--bad);color:var(--bad)}
+.undo-hint{font-size:12px;color:#4A4F62;margin-top:-6px;text-shadow:0 0 6px rgba(255,255,255,.9)}
+@media (hover:hover){.undo-hint{visibility:hidden}.col.chosen:hover .undo-hint{visibility:visible}}
+.col.dim .sprite canvas{filter:grayscale(.7);opacity:.55}
+.col.dim .hero h2,.col.dim .stats{opacity:.6}
+.badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:var(--pixel);font-size:10px;background:var(--ink);color:#fff;padding:5px 9px;border-radius:6px;white-space:nowrap;animation:pop .3s ease-out}
+@keyframes pop{from{transform:translate(-50%,-6px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.vs{position:absolute;left:50%;top:160px;transform:translateX(-50%);z-index:2;width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;font-family:var(--pixel);font-size:13px}
+.scout .px{color:var(--pi)}
+.bio{margin:0;font-size:16px;color:var(--ink)}
+.pts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pts li{display:grid;grid-template-columns:20px 1fr;gap:10px;font-size:15px;color:var(--ink-2);align-items:start}
+.pts .ic{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;font-family:var(--pixel);font-size:12px;color:#fff;margin-top:1px}
+.pts li.up .ic{background:var(--good)}.pts li.dn .ic{background:var(--bad)}
+.other{margin:0;font-size:14px;color:var(--mute);text-align:center}
+
+/* ---------- Poll board ---------- */
+.board{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:24px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:28px}
+.board h3{font-family:var(--display);font-weight:800;font-size:22px;margin:0;letter-spacing:-.01em}
+.board .left,.board .right{display:flex;flex-direction:column;gap:14px;min-width:0}
+.board .range{color:var(--mute);font-size:14px}
+.avgbar{display:flex;height:22px;border-radius:7px;overflow:hidden;gap:2px;background:var(--bg)}
+.avgbar span{display:block;height:100%}
+.seg-D{background:var(--d)}.seg-R{background:var(--r)}.seg-I{background:var(--i)}
+.seg-O{background:repeating-linear-gradient(90deg,#E3E5EE 0 4px,#F3F4F8 4px 8px)}
+.avglegend{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.avglegend div{display:flex;flex-direction:column;gap:2px}
+.avglegend span{font-size:13px;color:var(--mute)}
+.avglegend b{font-family:var(--display);font-weight:800;font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.avglegend .D b{color:var(--d-ink)}.avglegend .R b{color:var(--r-ink)}.avglegend .I b{color:var(--i-ink)}.avglegend .O b{color:var(--mute)}
+.avgnote{margin:0;font-size:14px;color:var(--mute)}
+.lead-pill{align-self:flex-start;font-weight:700;font-size:14px;padding:5px 12px;border-radius:999px;color:#fff}
+.lead-pill.D{background:var(--d)}.lead-pill.R{background:var(--r)}.lead-pill.I{background:var(--i);color:var(--ink)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th{font-size:10px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);color:var(--mute);white-space:nowrap;font-weight:400}
+td{padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+td.who{white-space:normal;font-weight:600}
+td.who .x{display:block;font-weight:400;font-size:13px;color:var(--mute)}
+td.who .m{display:none;font-weight:400;font-size:13px;color:var(--mute)}
+td.dim{color:var(--ink-2)}
+td.num span{display:inline-block;min-width:40px;padding:3px 8px;border-radius:7px;text-align:center}
+td.lead.D span{background:var(--d);color:#fff}td.lead.R span{background:var(--r);color:#fff}td.lead.I span{background:var(--i);color:var(--ink)}
+.oddlink{font-size:14px;font-weight:600}
+
+/* ---------- Summary ---------- */
+.summary{display:flex;flex-direction:column;gap:22px}
+.sumhead{display:flex;align-items:center;gap:16px}
+.arrow.back{position:static;margin-top:0;flex:none}
+.mobile-nav button[hidden]{display:none}
+.summary h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.4vw,46px);letter-spacing:-.02em;line-height:1.05;margin:0}
+.verdict{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:28px;display:flex;flex-direction:column;gap:18px}
+.verdict .big{font-family:var(--display);font-weight:800;font-size:clamp(22px,3vw,30px);line-height:1.15;margin:0;letter-spacing:-.01em}
+.verdict .sub{margin:0;color:var(--ink-2)}
+.seats{display:grid;grid-template-columns:repeat(25,minmax(0,1fr));gap:4px;max-width:660px}
+.seat{aspect-ratio:1;border-radius:3px;background:#E9EBF2;max-width:100%}
+.seat.R{background:var(--r)}.seat.D{background:var(--d)}.seat.I{background:var(--i)}
+.seat.mid{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--ink)}
+.tally{display:flex;gap:28px;flex-wrap:wrap}
+.tally div{display:flex;flex-direction:column}
+.tally span{font-size:13px;color:var(--mute)}
+.tally b{font-family:var(--display);font-weight:800;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.tally .D b{color:var(--d)}.tally .R b{color:var(--r)}.tally .I b{color:var(--i-ink)}.tally .U b{color:var(--mute)}
+.picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.pcard{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--bg);position:relative;overflow:hidden;transition:transform .12s, box-shadow .12s}
+.pcard:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.pcard::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:#D5D8E2}
+.pcard.D::before{background:var(--d)}.pcard.R::before{background:var(--r)}.pcard.I::before{background:var(--i)}
+.pcard .st{display:flex;justify-content:space-between;color:var(--mute)}
+.pcard .nm{font-weight:700;font-size:17px}
+.pcard.U .nm{color:var(--mute);font-weight:500}
+.fine{font-size:14px;color:var(--mute);margin:0;max-width:75ch}
+#copyOut{width:100%;min-height:120px;font-family:var(--body);font-size:14px;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px}
+
+footer{border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mute)}
+footer p{margin:0;max-width:110ch}
+
+.mobile-nav{display:none}
+
+@media (max-width:900px){
+  .board{grid-template-columns:minmax(0,1fr)}
+  .title{grid-template-columns:minmax(0,1fr)}
+  .title .copy{padding:32px 24px}
+  .stage{min-height:220px}
+  .stage canvas{width:84px}
+}
+@media (max-width:720px){
+  body.racing{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
+  .hud{gap:12px}
+  .pips{order:3;flex-basis:100%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+  .pip{min-width:0;height:22px;font-size:8px}
+  .arena{grid-template-columns:minmax(0,1fr)}
+  .arena .arrow{display:none}
+  .split .scout{grid-column:1/-1;border-left:0!important;border-top:1px solid rgba(18,20,28,.08)}
+  .hero{padding:40px 12px 16px;gap:10px}
+  .c-date,.c-sample{display:none}
+  td.who .m{display:block}
+  .sprite,.sprite canvas{width:106px}
+  .hero h2{font-size:19px}
+  .stats{grid-template-columns:minmax(0,1fr);gap:6px}
+  .stat{padding:8px 10px}
+  .stat.main .v{font-size:36px}
+  .stat.sub{flex-wrap:wrap;gap:4px 8px}
+  .stat.sub .segs{flex-basis:100%;order:3}
+  .pick{height:46px;font-size:15px}
+  .pick kbd{display:none}
+  .scout{padding:20px 18px 22px}
+  .vs{top:110px;width:38px;height:38px;font-size:11px}
+  .split[style*="--n:3"] .hero{padding:40px 8px 14px}
+  .split[style*="--n:3"] .sprite,.split[style*="--n:3"] .sprite canvas{width:80px}
+  .split[style*="--n:3"] .hero h2{font-size:15px}
+  .split[style*="--n:3"] .stat.main .v{font-size:26px}
+  .split[style*="--n:3"] .stat.main .lead{display:none}
+  .split[style*="--n:3"] .segs{display:none}
+  .split[style*="--n:3"] .chip.out{display:none}
+  .board{padding:18px}
+  .mobile-nav{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:20;
+    padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background:rgba(255,255,255,.55);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);border-top:1px solid rgba(255,255,255,.7)}
+  .mobile-nav button{height:46px;padding:0 18px;border-radius:999px;border:1px solid var(--line);font-weight:700;background:var(--bg)}
+  .mobile-nav button.go{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .mobile-nav button[disabled]{opacity:.35}
+  .mobile-nav .where{text-align:center;font-size:13px;color:var(--mute)}
+  .seats{grid-template-columns:repeat(20,minmax(0,1fr));gap:3px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+
+/* ---------- Backdrop scenes + glass panels ---------- */
+#scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;object-fit:cover;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.app{position:relative;z-index:1}
+.hud{margin-top:14px;padding:12px 16px;border:1px solid rgba(255,255,255,.7);border-radius:18px;background:rgba(255,255,255,.5);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);box-shadow:var(--shadow-sm)}
+.race-head{background:rgba(255,255,255,.44);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);border-radius:var(--r-lg);padding:14px 22px;align-self:center;max-width:820px;width:100%;box-shadow:var(--shadow-sm);border:1px solid rgba(255,255,255,.7)}
+.scenecap{color:var(--mute);display:inline-flex;gap:6px;align-items:center;font-size:10px}
+.scenecap i{width:6px;height:6px;background:var(--i);display:inline-block;transform:rotate(45deg)}
+.col{--pta:rgba(255,250,234,.38);--pt2a:rgba(255,239,192,.46)}
+.col.D{--pta:rgba(243,246,255,.38);--pt2a:rgba(228,236,255,.46)}
+.col.R{--pta:rgba(255,245,245,.38);--pt2a:rgba(255,228,229,.46)}
+.hero{background:linear-gradient(180deg,var(--pt2a),var(--pta))}
+.scout{background:var(--pta)}
+.split{background:rgba(255,255,255,.04);backdrop-filter:blur(3px) saturate(1.15);-webkit-backdrop-filter:blur(3px) saturate(1.15);border-color:rgba(255,255,255,.7)}
+.other{align-self:center;background:rgba(255,255,255,.46);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:8px 14px;border-radius:12px;max-width:760px}
+.board{background:rgba(255,255,255,.5);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);border-color:rgba(255,255,255,.7)}
+.title{background:transparent;border-color:rgba(255,255,255,.7)}
+.title .copy{background:rgba(255,255,255,.5);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15)}
+.title .stage{background:transparent;min-height:340px}
+.title .stage .scenecap{position:absolute;right:12px;bottom:30px;background:rgba(255,255,255,.7);padding:5px 9px;border-radius:8px;z-index:2}
+.sumhead{background:rgba(255,255,255,.46);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);border-radius:var(--r-lg);padding:16px 20px;box-shadow:var(--shadow-sm)}
+.verdict{background:rgba(255,255,255,.52);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15)}
+.pcard{background:rgba(255,255,255,.62)}
+footer{background:rgba(255,255,255,.46);backdrop-filter:blur(6px) saturate(1.15);-webkit-backdrop-filter:blur(6px) saturate(1.15);border-radius:var(--r-lg);padding:16px 20px;border-top:0;box-shadow:var(--shadow-sm)}
+@media (max-width:900px){.title .stage{min-height:240px}}
+@media (max-width:720px){.hud{margin-top:10px;padding:10px 12px}.race-head{padding:12px 14px}}
+.note,.other,.bio,.pts li,.avgnote,.range,.stage-no,.scenecap,footer p,.stat .k,.title p,.keys,.sub,.fine{text-shadow:0 0 8px rgba(255,255,255,.85),0 0 2px rgba(255,255,255,.9)}
+.note,.pts li,.title p,footer p,.fine{color:#2E3242}
+.mute-strong,.avgnote,.range,.stage-no,.scenecap,.stat .k{color:#4A4F62}
+</style>
+
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="app">
+  <header class="hud">
+    <button class="logo" id="homeBtn" aria-label="Back to the start screen">
+      <canvas id="logoFlag" width="8" height="6" aria-hidden="true"></canvas>
+      <span><span class="wm">Senate Pick'em</span><span class="yr">2026 midterms</span></span>
+    </button>
+    <nav class="pips" id="pips" aria-label="Races"></nav>
+    <div class="hud-right">
+      <span class="datastat loading" id="datastat" aria-live="polite">Updating…</span>
+      <span class="count" id="count"></span>
+      <button class="iconbtn" id="soundBtn" aria-pressed="true"></button>
+    </div>
+  </header>
+
+  <main id="screen" aria-live="polite"></main>
+
+  <footer>
+    <p>Polls: <a href="https://pollresults.org/" target="_blank" rel="noopener">PollResults.org</a> (data from The New York Times polls page, CC BY 4.0), loaded live each time the game opens. Polling averages are calculated here: the latest poll from each pollster in the three weeks before the newest poll.</p>
+    <p>Odds: <a href="https://polymarket.us/midterms" target="_blank" rel="noopener">Polymarket US</a>, loaded live. Each figure is the midpoint between the current buy and sell price, roughly the market's implied chance of winning. If live data can't be reached, the game shows a snapshot from Oct 21, 2026.</p>
+    <p>Nominees: <a href="https://clerk.house.gov/member_info/electionInfo/2026/120-nominations.pdf" target="_blank" rel="noopener">Office of the Clerk, U.S. House</a> (Oct 8, 2026). Candidate notes summarize public reporting and Wikipedia race pages and were written in October 2026. Candidate characters are 16-bit caricatures drawn from public photos (mostly Wikipedia portraits). They are approximate, drawn in one shared style, and not endorsed by any campaign.</p>
+    <p>Just a game. To check your registration or find where to vote, go to <a href="https://vote.gov" target="_blank" rel="noopener">vote.gov</a>.</p>
+  </footer>
+</div>
+<nav class="mobile-nav" id="mnav" hidden aria-label="Change state">
+  <button id="mprev">◀ Back</button>
+  <span class="where" id="mwhere"></span>
+  <button id="mnext" class="go">Next ▶</button>
+</nav>
+
+<script>
+/* ---------------- DATA ---------------- */
+const RACES = [
+{code:"NM",name:"New Mexico",tags:["INCUMBENT: D"],
+ note:"Luján seeks a second term. The Republican nominee made the ballot through a write-in campaign after the only filed Republican was disqualified.",
+ other:"Not on the board: no other candidates on the ballot.",
+ cands:[
+  {name:"Ben Ray Luján",party:"D",inc:true,bio:"U.S. senator since 2021. Represented New Mexico's 3rd District in the House from 2009 to 2021.",
+   pros:["Huge money edge: about $8.3M raised by June","New Mexico hasn't elected a Republican senator since 2002"],
+   cons:["Republicans paint him as a reflexive Trump opponent","Summer polls showed a 15-point lead, narrower than early-year numbers"]},
+  {name:"Larry Marker",party:"R",bio:"Roswell oil and gas operator. Won the GOP line with a write-in petition drive in the June primary.",
+   pros:["Energy background plays well in the oil-producing southeast","No voting record for opponents to attack"],
+   cons:["Raised about $34K by June","Little statewide name recognition"]}],
+ odds:[98,3],avg:{v:[53.5,37.0],range:"Sep 1 – Oct 5",note:"Simple average of the 2 general-election polls. 270toWin has no average for this race yet."},
+ polls:[{p:"SurveyUSA",d:"Oct 5",n:"567 LV",v:[54,36]},{p:"RMG Research",d:"Sep 1",n:"516 LV",v:[53,38]}]},
+
+{code:"NC",name:"North Carolina",tags:["OPEN SEAT","INCUMBENT: R"],
+ note:"Open seat after Sen. Thom Tillis (R) chose not to run. Two of the state's best-known political names face off.",
+ other:"Also on the ballot: Michael Dublin (Green), Shannon Bray (Libertarian).",
+ cands:[
+  {name:"Roy Cooper",party:"D",bio:"Governor 2017–2025 and state attorney general for 16 years before that.",
+   pros:["Has won six statewide races, including in Trump years","Leads every recent poll, often by double digits"],
+   cons:["North Carolina hasn't elected a Democratic senator since 2008","Trump carried the state three times"]},
+  {name:"Michael Whatley",party:"R",bio:"Chaired the Republican National Committee in 2024–2025 and the NC GOP before that. Trump-endorsed.",
+   pros:["Trump endorsement and national party network","Won the primary with about 65%"],
+   cons:["First run for elected office, against a former two-term governor","Trails by about 10 in the polling average"]}],
+ odds:[96,6],avg:{v:[51.4,41.4],range:"Oct 8 – 20"},
+ polls:[{p:"YouGov",d:"Oct 20",n:"560 LV",v:[54,43]},{p:"Change Research",d:"Oct 13",n:"829 LV",v:[50,40]},{p:"SurveyUSA",d:"Oct 13",n:"643 LV",v:[54,40]},{p:"Trafalgar Group",d:"Oct 12",n:"1,091 LV",v:[49,41]}]},
+
+{code:"GA",name:"Georgia",tags:["INCUMBENT: D"],
+ note:"One of two Democratic-held seats up this year in a state Trump won in 2024. Collins won a June runoff for the GOP nomination.",
+ other:"No other candidates on the ballot.",
+ cands:[
+  {name:"Jon Ossoff",party:"D",inc:true,bio:"U.S. senator since 2021. Previously ran an investigative documentary production company.",
+   pros:["Enormous war chest: about $98M raised by June","Leads the polling average by about 9"],
+   cons:["Defending a seat in a state Trump carried in 2024","Republicans argue his record is too liberal for Georgia"]},
+  {name:"Mike Collins",party:"R",bio:"U.S. representative for Georgia's 10th District since 2023. Owns a trucking business.",
+   pros:["Trump endorsement; won the runoff with 55.5%","Strong standing with the GOP base"],
+   cons:["Gov. Brian Kemp backed his primary rival","Outraised by Ossoff by more than 10 to 1"]}],
+ odds:[94,7],avg:{v:[52.2,43.4],range:"Sep 23 – Oct 19"},
+ polls:[{p:"Quantus Insights",d:"Oct 19",n:"755 LV",v:[53,45]},{p:"Trafalgar Group",d:"Oct 10",n:"1,101 LV",v:[51,43]},{p:"Wedgewood Polls",d:"Oct 4",n:"600 LV",v:[55,45]},{p:"InsiderAdvantage",d:"Sep 25",n:"1,200 LV",v:[50,42]}]},
+
+{code:"NH",name:"New Hampshire",tags:["OPEN SEAT","INCUMBENT: D"],
+ note:"Open seat after Sen. Jeanne Shaheen (D) retired. Sununu is trying to win back the seat Shaheen took from him in 2008.",
+ other:"Also on the ballot: Edmond Laplante (Constitution).",
+ cands:[
+  {name:"Chris Pappas",party:"D",bio:"U.S. representative for New Hampshire's 1st District since 2019. Co-owns his family's Manchester restaurant.",
+   pros:["Big money edge: $15.4M raised vs. $4.1M by August","Backed by Shaheen and Sen. Maggie Hassan"],
+   cons:["No incumbency advantage in an open seat","Faced a progressive primary challenge (won with 65%)"]},
+  {name:"John E. Sununu",party:"R",bio:"U.S. senator 2003–2009, from New Hampshire's best-known Republican family.",
+   pros:["Near-universal name recognition","Endorsed by Trump, Gov. Kelly Ayotte and his brother, ex-Gov. Chris Sununu"],
+   cons:["Lost his 2008 reelection race to Shaheen","Republicans haven't won a New Hampshire Senate race since 2010"]}],
+ odds:[91,11],avg:{v:[49.8,43.0],range:"Sep 24 – Oct 20"},
+ polls:[{p:"National Public Affairs",d:"Oct 20",n:"600 LV",v:[50,43]},{p:"Saint Anselm College",d:"Oct 6",n:"1,042 LV",v:[51,44]},{p:"YouGov",d:"Oct 6",n:"1,519 LV",v:[51,43]},{p:"Trafalgar Group",d:"Sep 27",n:"1,082 LV",v:[47,41]}]},
+
+{code:"AK",name:"Alaska",tags:["INCUMBENT: R","RANKED CHOICE"],
+ note:"Alaska uses a top-four, ranked-choice general election. Two minor Republicans are also on the ballot, including a retired teacher named Daniel J. Sullivan Jr.",
+ other:"Also on the ballot: Gerald Heikes (R) and Daniel J. Sullivan Jr., who is not the incumbent.",
+ cands:[
+  {name:"Mary Peltola",party:"D",bio:"U.S. representative 2022–2025 and the first Alaska Native in Congress.",
+   pros:["Last Democrat to win statewide in Alaska; strong crossover appeal","Raised $32.6M through September"],
+   cons:["A September NYT report aired former aides' allegations of workplace misconduct; her campaign disputes parts of it","Lost her House seat in 2024"]},
+  {name:"Dan Sullivan",party:"R",inc:true,bio:"U.S. senator since 2015. Marine Corps veteran and former Alaska attorney general.",
+   pros:["Endorsed by Trump and by Sen. Lisa Murkowski","Incumbent in a state Trump won by about 13"],
+   cons:["Trails narrowly in recent polls","Two other Republicans on the ballot, one sharing his name, could siphon votes"]}],
+ odds:[74,26],avg:{v:[47.0,44.8],range:"Sep 26 – Oct 20",note:"270toWin average of first-choice votes. Its head-to-head average is Peltola 48.5, Sullivan 45.0."},
+ polls:[{p:"Data for Progress",d:"Oct 20",n:"694 LV",v:[47,44],x:"1st round; final 51–49"},{p:"InsiderAdvantage",d:"Oct 11",n:"1,200 LV",v:[48,43],x:"1st round; final 50–48"},{p:"Alaska Survey Research",d:"Oct 6",n:"1,512 LV",v:[47,45],x:"1st round"},{p:"Siena College",d:"Oct 3",n:"504 LV",v:[50,43],x:"head-to-head"}]},
+
+{code:"IA",name:"Iowa",tags:["OPEN SEAT","INCUMBENT: R"],
+ note:"Open seat after Sen. Joni Ernst (R) chose not to run. The tightest race on the board by polling average.",
+ other:"Also on the ballot: Thomas Laehn (Libertarian).",
+ cands:[
+  {name:"Josh Turek",party:"D",bio:"State representative since 2023 and a two-time Paralympic medalist in wheelchair basketball.",
+   pros:["Compelling personal story and a western-Iowa base","Led in some October polls (Marist +3)"],
+   cons:["Lower statewide name recognition","Democrats haven't won an Iowa Senate race since 2008"]},
+  {name:"Ashley Hinson",party:"R",bio:"U.S. representative for Iowa's 2nd District since 2021. Former TV news anchor.",
+   pros:["Endorsed by Trump, Ernst and Gov. Kim Reynolds","Republicans have dominated recent statewide races"],
+   cons:["Open seat in a tough national environment for her party","Her lead in polls is within the margin of error"]}],
+ odds:[42,59],avg:{v:[45.6,46.4],range:"Oct 14 – 20"},
+ polls:[{p:"National Public Affairs",d:"Oct 20",n:"678 LV",v:[44,47]},{p:"co/efficient",d:"Oct 19",n:"863 LV",v:[45,48]},{p:"Trafalgar Group",d:"Oct 17",n:"1,094 LV",v:[44,46]},{p:"Marist Poll",d:"Oct 15",n:"1,100 LV",v:[48,45]}]},
+
+{code:"KS",name:"Kansas",tags:["INCUMBENT: R"],
+ note:"Kansas hasn't elected a Democratic senator since 1932, but polls have this one inside the margin of error.",
+ other:"Also on the ballot: David Graham (Libertarian).",
+ cands:[
+  {name:"Adam Hamilton",party:"D",bio:"Founding pastor of the Church of the Resurrection, a large United Methodist congregation. First run for office.",
+   pros:["Endorsed by two former Republican governors, Mike Hayden and Bill Graves","Well known across the Kansas City area"],
+   cons:["No political or governing experience","Less cash than Marshall: $1.7M vs. $5.4M on hand in July"]},
+  {name:"Roger Marshall",party:"R",inc:true,bio:"U.S. senator since 2021 and an OB-GYN. Served in the House 2017–2021.",
+   pros:["Trump-endorsed incumbent with a cash advantage","Deep Republican lean: no Democrat has won a Kansas Senate race since 1932"],
+   cons:["Scrutiny over his practice suing hundreds of patients over unpaid bills","Two former GOP governors endorsed his opponent"]}],
+ odds:[39,63],avg:{v:[46.8,45.6],range:"through Oct 16"},
+ polls:[{p:"InsiderAdvantage",d:"Oct 16",n:"1,200 LV",v:[47,48]},{p:"InsiderAdvantage",d:"Oct 11",n:"1,200 LV",v:[48,47]},{p:"YouGov",d:"Oct 6",n:"2,253 LV",v:[48,45]},{p:"Siena College",d:"Oct 3",n:"605 LV",v:[45,45],x:"Graham (L) 3"}]},
+
+{code:"ME",name:"Maine",tags:["INCUMBENT: R"],
+ note:"Primary winner Graham Platner withdrew in July. Jackson won the Democratic nomination at a party convention.",
+ other:"No other candidates on the ballot.",
+ cands:[
+  {name:"Troy Jackson",party:"D",bio:"Former president of the Maine Senate and a logger from Allagash.",
+   pros:["Strong labor backing, including the Maine AFL-CIO","Narrow but steady lead in October polls"],
+   cons:["Late start after the July nominee switch","Some top Democrats, including Gov. Janet Mills, haven't endorsed him"]},
+  {name:"Susan Collins",party:"R",inc:true,bio:"U.S. senator since 1997, seeking a sixth term.",
+   pros:["Known for beating the polls, most famously in 2020","Independent brand and about $11M on hand in June"],
+   cons:["Maine voted for Harris by about 7 points","Criticized by some Republicans for breaking with Trump and by Democrats for siding with him"]}],
+ odds:[65,38],avg:{v:[49.6,46.8],range:"Oct 5 – 16"},
+ polls:[{p:"InsiderAdvantage",d:"Oct 16",n:"1,200 LV",v:[49,47]},{p:"Suffolk University",d:"Oct 14",n:"500 LV",v:[49,47]},{p:"Washington Post-Schar",d:"Oct 9",n:"800 LV",v:[50,46]},{p:"Marist Poll",d:"Oct 6",n:"1,505 RV",v:[51,47]}]},
+
+{code:"MI",name:"Michigan",tags:["OPEN SEAT","INCUMBENT: D"],
+ note:"Open seat after Sen. Gary Peters (D) retired. El-Sayed edged Rep. Haley Stevens in an August primary; Rogers is back after nearly winning in 2024.",
+ other:"Also on the ballot: Lydia Christensen (Libertarian), Walter Kristy (Natural Law), Tim Long (U.S. Taxpayers), Douglas Marsh (Green).",
+ cands:[
+  {name:"Abdul El-Sayed",party:"D",bio:"Physician and former Wayne County health director. Ran for governor in 2018.",
+   pros:["Party consolidated behind him after the primary","Leads the polling average by about 4"],
+   cons:["Positions like Medicare for All and abolishing ICE draw GOP attacks","Criticized over his past comments on \"defund the police\""]},
+  {name:"Mike Rogers",party:"R",bio:"Former FBI agent and congressman who chaired the House Intelligence Committee. Lost the 2024 Senate race by about 19,000 votes.",
+   pros:["Came within a third of a point in 2024","More cash on hand mid-summer: $4.5M vs. $2.6M"],
+   cons:["Republicans haven't won a Michigan Senate race since 1994","Running again two years after losing"]}],
+ odds:[68,32],avg:{v:[48.7,44.9],range:"Oct 5 – 11"},
+ polls:[{p:"Rasmussen Reports",d:"Oct 16",n:"",v:[46,44],rcp:true},{p:"InsiderAdvantage",d:"Oct 11",n:"1,200 LV",v:[48,46]},{p:"Z to A Research",d:"Oct 9",n:"483 LV",v:[49,42]},{p:"Wedgewood Polls",d:"Oct 9",n:"607 LV",v:[53,47]}]},
+
+{code:"MN",name:"Minnesota",tags:["OPEN SEAT","INCUMBENT: D"],
+ note:"Open seat after Sen. Tina Smith (DFL) retired. In Minnesota, Democrats run as the Democratic-Farmer-Labor Party.",
+ other:"Also on the ballot: Marisa Simonetti (Independent), Rebecca Whiting (Libertarian).",
+ cands:[
+  {name:"Peggy Flanagan",party:"D",label:"DFL",bio:"Lieutenant governor of Minnesota since 2019.",
+   pros:["Broad progressive and union coalition","Leads the polling average by about 4"],
+   cons:["Her primary rival called her ICE position extreme","Turns down corporate PAC money, limiting one fundraising stream"]},
+  {name:"Michele Tafoya",party:"R",bio:"Former NBC Sunday Night Football sideline reporter turned conservative commentator. First run for office.",
+   pros:["High name recognition from decades on TV","Had more cash on hand than Flanagan in July"],
+   cons:["No record in office to run on","Republicans haven't won a Minnesota Senate race since 2002"]}],
+ odds:[86,15],avg:{v:[47.0,42.6],range:"Oct 9 – 17"},
+ polls:[{p:"Trafalgar Group",d:"Oct 17",n:"1,079 LV",v:[48,45]},{p:"SurveyUSA",d:"Oct 14",n:"718 LV",v:[45,42]},{p:"Mason-Dixon",d:"Oct 12",n:"800 LV",v:[47,43]},{p:"GQR",d:"Oct 9",n:"800 LV",v:[50,42]}]},
+
+{code:"OH",name:"Ohio",tags:["SPECIAL ELECTION","INCUMBENT: R"],
+ note:"Special election for the rest of JD Vance's term, which runs to January 2029. Husted was appointed to the seat in 2025.",
+ other:"Also on the ballot: Bill Redpath (Libertarian), Greg Levy (Independent).",
+ cands:[
+  {name:"Sherrod Brown",party:"D",bio:"Three-term U.S. senator (2007–2025) who lost reelection in 2024.",
+   pros:["Deep labor support, including the UAW and Ohio AFL-CIO","Leads the polling average by about 3"],
+   cons:["Lost his last race, in 2024","Ohio has trended Republican; Trump won it by about 11"]},
+  {name:"Jon Husted",party:"R",inc:true,bio:"Appointed senator in 2025. Former lieutenant governor and secretary of state.",
+   pros:["Incumbent backed by Trump and Vance","Republican lean of the state"],
+   cons:["Has never won this seat at the ballot box","Former Gov. John Kasich has withheld his endorsement"]}],
+ odds:[64,37],avg:{v:[47.6,44.6],range:"Oct 8 – 20"},
+ polls:[{p:"Marist Poll",d:"Oct 20",n:"1,176 LV",v:[48,44]},{p:"Rasmussen Reports",d:"Oct 19",n:"",v:[47,49],rcp:true},{p:"ActiVote",d:"Oct 18",n:"400 LV",v:[50,50]},{p:"Bowling Green/YouGov",d:"Oct 16",n:"1,000 LV",v:[48,42]}]},
+
+{code:"TX",name:"Texas",tags:["INCUMBENT: R"],
+ note:"Paxton ousted Sen. John Cornyn in a May runoff. Talarico beat Rep. Jasmine Crockett in the Democratic primary.",
+ other:"No other candidates listed.",
+ cands:[
+  {name:"James Talarico",party:"D",bio:"Texas state representative and former public-school teacher known for faith-centered messaging.",
+   pros:["Crossover appeal and a viral media presence","Narrow lead in the polling average"],
+   cons:["Texas hasn't elected a Democratic senator since 1988","Republicans cast him as too liberal for Texas"]},
+  {name:"Ken Paxton",party:"R",bio:"Texas attorney general since 2015. Beat Cornyn with 64% after Trump endorsed him.",
+   pros:["Trump endorsement and a fired-up GOP base","Texas's long Republican lean"],
+   cons:["Impeached by the Texas House in 2023 (acquitted by the Senate), plus other legal controversies","Some Cornyn backers are wary after a bruising runoff"]}],
+ odds:[62,39],avg:{v:[48.7,46.9],range:"Oct 12 – 19"},
+ polls:[{p:"Univ. of Houston Hobby",d:"Oct 19",n:"2,000 LV",v:[48,46]},{p:"YouGov",d:"Oct 18",n:"1,458 LV",v:[51,49]},{p:"InsiderAdvantage",d:"Oct 16",n:"1,200 LV",v:[48,49]},{p:"ActiVote",d:"Oct 15",n:"400 LV",v:[52,48]}]},
+
+{code:"FL",name:"Florida",tags:["SPECIAL ELECTION","INCUMBENT: R"],
+ note:"Special election for the rest of Marco Rubio's term, which runs to January 2029. Moody was appointed in 2025; Nixon upset Alex Vindman in the primary.",
+ other:"No other candidates on the ballot.",
+ cands:[
+  {name:"Angie Nixon",party:"D",bio:"Jacksonville state representative since 2020 and a democratic socialist.",
+   pros:["Beat a far better-funded primary opponent","Energized progressive base"],
+   cons:["Heavily outspent: $0.26M vs. $8.5M on hand in July","Democrats haven't won a Florida Senate race since 2012"]},
+  {name:"Ashley Moody",party:"R",inc:true,bio:"Appointed senator in 2025. Former Florida attorney general and circuit judge.",
+   pros:["Large cash advantage","Florida's strong recent Republican lean"],
+   cons:["Has never won this seat at the ballot box","Polls show a high-single-digit lead, not a landslide"]}],
+ odds:[10,93],avg:{v:[43.4,50.4],range:"Oct 8 – 17"},
+ polls:[{p:"Univision/YouGov",d:"Oct 19",n:"",v:[42,51],rcp:true},{p:"ActiVote",d:"Oct 17",n:"400 LV",v:[47,53]},{p:"MDW Communications",d:"Oct 14",n:"2,351 LV",v:[42,48]},{p:"Stetson University",d:"Oct 13",n:"716 LV",v:[41,52]}]},
+
+{code:"SC",name:"South Carolina",tags:["INCUMBENT: R"],
+ note:"Sen. Lindsey Graham died in July. His sister was appointed to the seat and won a special GOP runoff for the nomination.",
+ other:"Also on the ballot: Kasie Whitener (Libertarian), Mark Hackett (Constitution).",
+ cands:[
+  {name:"Annie Andrews",party:"D",bio:"Pediatrician and the 2022 Democratic nominee for South Carolina's 1st District.",
+   pros:["Within a few points in recent polls","Health-care-focused message"],
+   cons:["South Carolina hasn't elected a Democratic senator since 1998","Underdog in a state Trump won by about 18"]},
+  {name:"Darline Graham Nordone",party:"R",inc:true,bio:"Appointed senator in July after her brother's death. Spent her career helping people with disabilities find jobs.",
+   pros:["Trump-backed, in a deep-red state","Family name and goodwill"],
+   cons:["First run for office; won the runoff over Rep. Ralph Norman with about 52%","Polls much closer than South Carolina usually is"]}],
+ odds:[18,85],avg:{v:[45.5,47.5],range:"Oct 2 – 18"},
+ polls:[{p:"Trafalgar Group",d:"Oct 18",n:"1,095 LV",v:[46,49]},{p:"Rasmussen Reports",d:"Oct 11",n:"",v:[45,49],rcp:true},{p:"InsiderAdvantage",d:"Oct 2",n:"1,200 LV",v:[45,46]},{p:"Trafalgar Group",d:"Sep 26",n:"1,089 LV",v:[42,43]}]},
+
+{code:"NE",name:"Nebraska",tags:["INCUMBENT: R","NO DEMOCRAT"],
+ note:"No Democrat is on the ballot. The Democratic nominee withdrew in July and the state party endorsed Osborn, an independent.",
+ other:"Also on the ballot: Chuck Conboy (America First), Robin Richards (Working People), Mike Marvin (withdrew, still listed).",
+ cands:[
+  {name:"Dan Osborn",party:"I",bio:"Navy veteran and former union leader who led a 2021 strike at Kellogg's. Lost the 2024 Senate race by under 7 points.",
+   pros:["Populist, blue-collar message with crossover appeal","Democrats stepped aside and back him, along with major unions"],
+   cons:["No party organization of his own","Less money: $2.4M vs. $6.9M on hand in June"]},
+  {name:"Pete Ricketts",party:"R",inc:true,bio:"U.S. senator since 2023 and governor from 2015 to 2023.",
+   pros:["Fundraising advantage and personal wealth","Nebraska's strong Republican lean"],
+   cons:["Polls show a single-digit race","Facing a well-funded independent with labor support"]}],
+ odds:[34,69],avg:{v:[43.7,46.0],range:"Oct 2 – 20"},
+ polls:[{p:"National Public Affairs",d:"Oct 20",n:"800 LV",v:[43,46]},{p:"YouGov",d:"Oct 6",n:"1,808 LV",v:[48,47]},{p:"co/efficient",d:"Oct 2",n:"1,113 LV",v:[40,45]},{p:"Wedgewood Polls",d:"Sep 16",n:"500 LV",v:[48,52]}]},
+
+{code:"MT",name:"Montana",tags:["OPEN SEAT","INCUMBENT: R","3-WAY RACE"],
+ note:"Sen. Steve Daines (R) withdrew minutes after Alme filed at the deadline and endorsed him. The anti-Alme vote is split between an independent and the Democrat.",
+ other:"Also on the ballot: Kyle Austin (Libertarian), Jami Dee Woodman (Nonpartisan).",
+ cands:[
+  {name:"Alani Bankhead",party:"D",bio:"Air Force lieutenant colonel and leadership coach from Helena.",
+   pros:["Holds the Democratic ballot line","Military background"],
+   cons:["Raised about $24K by May","Polling around 20%"]},
+  {name:"Seth Bodnar",party:"I",bio:"Army veteran and president of the University of Montana from 2018 to 2026.",
+   pros:["Backed by ex-Sen. Jon Tester (D) and ex-Gov. Marc Racicot (R)","Outraised Alme in the spring"],
+   cons:["Splits the non-Republican vote with the Democratic nominee","Bankhead has pressed him on a 2021 university discrimination lawsuit; his campaign says no wrongdoing was found"]},
+  {name:"Kurt Alme",party:"R",bio:"Former U.S. attorney for Montana.",
+   pros:["Endorsed by Trump, Daines and Gov. Greg Gianforte","Leads by about 16 with the opposition split"],
+   cons:["Criticized by both parties over Daines's last-minute handoff","Trailed Bodnar in early fundraising"]}],
+ odds:[2,6,93],avg:{v:[19.3,26.7,42.3],range:"Sep 11 – 28"},
+ polls:[{p:"Quantus Insights",d:"Oct 20",n:"",v:[21,28,44],rcp:true},{p:"American Pulse",d:"Sep 28",n:"604 LV",v:[19,26,45]},{p:"Quantus Insights",d:"Sep 17",n:"625 LV",v:[23,24,44]},{p:"Rutgers-Eagleton",d:"Sep 11",n:"845 RV",v:[16,30,38]}]}
+];
+const margin=r=>{const s=[...r.avg.v].sort((a,b)=>b-a);return s[0]-s[1];};
+RACES.sort((a,b)=>margin(b)-margin(a));
+function avgLead(r,ci){const v=r.avg.v[ci],mx=Math.max(...r.avg.v),s=[...r.avg.v].sort((a,b)=>b-a);
+  return v===mx?`Leads by ${(s[0]-s[1]).toFixed(1)}`:`Trails by ${(mx-v).toFixed(1)}`;}
+const MARKET = c => "https://polymarket.us/event/usse-"+c.toLowerCase()+"-2026-11-03";
+/* ---------------- LIVE DATA ----------------
+   On load: Polymarket US (odds) + PollResults.org (polls, sourced from the NYT polls page).
+   Each race keeps its built-in snapshot until fresh data for it arrives. */
+const LIVE={status:"loading",updated:null,okOdds:0,okPolls:0};
+const SNAPSHOT_LABEL="Oct 21 snapshot";
+const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z\s]/g," ").replace(/\s+/g," ").trim();
+const NAME_LASTS={"Darline Graham Nordone":["graham","nordone"],"Ben Ray Luján":["lujan"]};
+const NAME_NOT={"Dan Sullivan":/\bj\b|\bjr\b/};
+function nameMatches(cand,raw){
+  const n=norm(raw); if(!n) return false;
+  if(NAME_NOT[cand.name]&&NAME_NOT[cand.name].test(n)) return false;
+  const toks=n.split(" "), mine=norm(cand.name).split(" ");
+  const lasts=NAME_LASTS[cand.name]||[mine[mine.length-1]];
+  const first=mine[0];
+  const lastOk=lasts.some(l=>toks.includes(l)), firstOk=toks[0]===first||toks[0].startsWith(first.slice(0,3));
+  return lastOk&&firstOk;
+}
+const pDate=s=>{const m=String(s||"").match(/^(\d+)\/(\d+)\/(\d+)$/);if(!m)return null;const y=+m[3]<100?2000+ +m[3]:+m[3];return new Date(y,+m[1]-1,+m[2]);};
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmtD=d=>MON[d.getMonth()]+" "+d.getDate();
+const fmtOdds=v=>v>0&&v<1?"<1":String(Math.round(v));
+const POP_RANK={lv:0,rv:1,v:2,a:3};
+const fmtSample=(q)=>{const n=q.sampleSize?Number(q.sampleSize).toLocaleString("en-US"):"";return (n?n+" ":"")+String(q.population||"").toUpperCase();};
+
+async function fetchJSON(url,ms=9000){
+  const c=new AbortController(); const t=setTimeout(()=>c.abort(),ms);
+  try{ const r=await fetch(url,{signal:c.signal}); if(!r.ok) throw new Error(r.status); return await r.json(); }
+  finally{ clearTimeout(t); }
+}
+async function liveOdds(r){
+  const j=await fetchJSON("https://gateway.polymarket.us/v1/events/slug/usse-"+r.code.toLowerCase()+"-2026-11-03");
+  const mk=(j.event&&j.event.markets||[]).filter(m=>!m.hidden);
+  const odds=r.cands.map(c=>{const m=mk.find(m=>nameMatches(c,m.title));if(!m)return null;
+    const b=parseFloat(m.bestBidQuote&&m.bestBidQuote.value),a=parseFloat(m.bestAskQuote&&m.bestAskQuote.value);
+    const mid=!isNaN(b)&&!isNaN(a)?(b+a)/2:!isNaN(a)?a/2:!isNaN(b)?b:null;return mid==null?null:mid*100;});
+  if(odds.some(v=>v==null)) throw new Error("unmatched market");
+  r.odds=odds.map(v=>Math.round(v*10)/10);
+}
+async function livePolls(r){
+  const j=await fetchJSON("https://api.pollresults.org/v1.0/politics/results/senate?state="+r.code+"&limit=100");
+  const rows=[];
+  (j.results||[]).forEach(p=>{
+    if(String(p.hypothetical).toUpperCase()==="TRUE") return;
+    const end=pDate(p.endDate); if(!end) return;
+    let best=null;
+    (p.questions||[]).forEach(q=>{
+      if(q.stage&&q.stage!=="general") return;
+      const ans=q.answers||[];
+      const v=r.cands.map(c=>{const a=ans.find(a=>nameMatches(c,a.candidateName));return a?parseFloat(a.pct):null;});
+      if(v.some(x=>x==null||isNaN(x))) return;
+      const final=ans.some(a=>String(a.rankedChoiceFinal).toUpperCase()==="TRUE");
+      const score=[POP_RANK[q.population]??4, ans.length];
+      if(!best||score[0]<best.score[0]||(score[0]===best.score[0]&&score[1]<best.score[1])) best={v,score,q,final};
+    });
+    if(best) rows.push({id:p.pollId,pollster:p.displayName||p.pollster,end,q:best.q,v:best.v,final:best.final,internal:String(p.internal).toUpperCase()==="TRUE"});
+  });
+  if(!rows.length) throw new Error("no polls");
+  rows.sort((a,b)=>b.end-a.end);
+  const seen=new Set(), uniq=rows.filter(x=>!seen.has(x.id)&&seen.add(x.id));
+  r.polls=uniq.slice(0,4).map(x=>({p:x.pollster,d:fmtD(x.end),n:fmtSample(x.q),v:x.v.map(n=>Math.round(n*10)/10),x:x.final?"ranked-choice final round":(x.internal?"internal poll":"")}));
+  /* our average: latest poll from each pollster ending within 21 days of the newest poll, up to 8 */
+  const newest=uniq[0].end, cutoff=new Date(newest.getTime()-21*864e5), byP=new Map();
+  uniq.forEach(x=>{if(x.end>=cutoff&&!byP.has(x.pollster)&&byP.size<8)byP.set(x.pollster,x);});
+  let pool=[...byP.values()]; if(pool.length<2) pool=uniq.slice(0,Math.min(3,uniq.length));
+  const avg=r.cands.map((_,ci)=>Math.round(pool.reduce((s,x)=>s+x.v[ci],0)/pool.length*10)/10);
+  const oldest=pool.reduce((m,x)=>x.end<m?x.end:m,pool[0].end);
+  r.avg={v:avg,range:fmtD(oldest)+" – "+fmtD(newest),note:"Average of "+pool.length+" recent poll"+(pool.length>1?"s":"")+", using the latest from each pollster."+(r.code==="AK"?" Uses ranked-choice final-round numbers where a poll reports them.":"")};
+}
+async function loadLive(){
+  LIVE.status="loading"; renderStatus();
+  const jobs=[];
+  RACES.forEach(r=>{
+    jobs.push(liveOdds(r).then(()=>{LIVE.okOdds++;}).catch(()=>{}));
+    jobs.push(livePolls(r).then(()=>{LIVE.okPolls++;}).catch(()=>{}));
+  });
+  await Promise.all(jobs);
+  LIVE.updated=new Date();
+  LIVE.status=(LIVE.okOdds+LIVE.okPolls)===0?"offline":(LIVE.okOdds===RACES.length&&LIVE.okPolls===RACES.length?"live":"partial");
+  /* re-sort by the fresh margins, keeping the viewer on the same state */
+  const curCode=view.screen==="race"?RACES[view.i].code:null;
+  RACES.sort((a,b)=>margin(b)-margin(a));
+  if(curCode) view.i=RACES.findIndex(r=>r.code===curCode);
+  live.length=0; render();
+}
+function renderStatus(){
+  const el=document.getElementById("datastat"); if(!el) return;
+  const t=LIVE.updated?LIVE.updated.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"";
+  const txt={loading:"Updating…",live:"Live · "+t,partial:"Partly live · "+t,offline:SNAPSHOT_LABEL}[LIVE.status];
+  el.className="datastat "+LIVE.status; el.textContent=txt;
+  el.title={loading:"Fetching the latest polls and odds",live:"Polls and odds loaded at "+t,partial:"Some races could not be refreshed and show the Oct 21 snapshot",offline:"Live data could not be reached, showing the Oct 21 snapshot"}[LIVE.status];
+}
+
+/* Seats not in this game: assumes the other 19 races stay with the party holding them (11 R, 8 D), plus 65 holdovers (31 R, 34 D incl. 2 independents who caucus with Democrats). */
+const BASE = {R:42, D:42};
+
+
+/* ---------------- STATE ---------------- */
+const KEY="senatePickem2026.picks", SKEY="senatePickem2026.sound";
+let picks={}; let sound=true;
+try{ picks=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ picks={}; }
+try{ sound=localStorage.getItem(SKEY)!=="off"; }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(picks)); }catch(e){} }
+let view={screen:"title", i:0};
+const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 16-BIT BACKDROPS ---------------- */
+const BG=(function(){
+const cv=document.getElementById("scene"), g0=cv.getContext("2d");
+let W=320,H=200,rt=null;
+const mk=()=>document.createElement("canvas");
+const skyC=mk(), landC=mk(), prevC=mk();
+let key=null, scene=null, fadeT0=0, fading=false, last=0;
+const FADE=420;
+const X=f=>Math.round(f*W), Y=f=>Math.round(f*H);
+const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].map(r=>r.map(v=>(v+.5)/16));
+const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+function RNG(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function noise(seed){const r=RNG(seed*7919+13),v=Array.from({length:256},r);return x=>{const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return v[i&255]*(1-u)+v[(i+1)&255]*u;};}
+function R(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function grad(g,stops,y0,y1,N=16){
+  y0=Math.round(y0);y1=Math.round(y1); const hh=y1-y0; if(hh<=0) return;
+  const cols=[]; for(let k=0;k<N;k++){const t=k/(N-1); let i=0; while(i<stops.length-2&&t>stops[i+1][0]) i++;
+    const a=stops[i],b=stops[i+1]; const u=Math.max(0,Math.min(1,(t-a[0])/((b[0]-a[0])||1))); cols.push(mix(hex(a[1]),hex(b[1]),u));}
+  const img=g.getImageData(0,y0,W,hh), d=img.data;
+  for(let y=0;y<hh;y++){ const t=y/Math.max(1,hh-1)*(N-1), c0=Math.floor(t), fr=t-c0;
+    for(let x=0;x<W;x++){ const c=cols[Math.min(N-1,c0+(fr>BAYER[y&3][x&3]?1:0))], o=(y*W+x)*4; d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2];d[o+3]=255; } }
+  g.putImageData(img,0,y0);
+}
+function dith(g,x,y,w,h,c,den){g.fillStyle=c;for(let yy=Math.round(y);yy<y+h;yy++)for(let xx=Math.round(x);xx<x+w;xx++)if(BAYER[yy&3][xx&3]<den)g.fillRect(xx,yy,1,1);}
+function disc(g,cx,cy,r,c,half){cx=Math.round(cx);cy=Math.round(cy);r=Math.round(r);g.fillStyle=c;for(let dy=-r;dy<=(half?0:r);dy++){const w=Math.floor(Math.sqrt(r*r-dy*dy+.5));g.fillRect(cx-w,cy+dy,w*2+1,1);}}
+function pline(g,x0,y0,x1,y1,c){x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(x1);y1=Math.round(y1);g.fillStyle=c;
+  let dx=Math.abs(x1-x0),sx=x0<x1?1:-1,dy=-Math.abs(y1-y0),sy=y0<y1?1:-1,err=dx+dy,n=0;
+  for(;;){g.fillRect(x0,y0,1,1);if((x0===x1&&y0===y1)||n++>800)break;const e2=2*err;if(e2>=dy){err+=dy;x0+=sx;}if(e2<=dx){err+=dx;y0+=sy;}}}
+function ridge(g,o){const n=noise(o.seed||1),tops=[],base=[];
+  for(let x=0;x<W;x++){let h=0,a=1,f=o.sc||.05,tot=0,b0=0;for(let k=0;k<(o.oct||3);k++){let v=n(x*f+k*37);if(o.peak)v=1-Math.abs(2*v-1);if(k===0)b0=v;h+=v*a;tot+=a;a*=.5;f*=2;}
+    h/=tot;if(o.flat)h=Math.min(h,o.flat);const top=Math.round(o.y-h*o.amp);tops.push(top);base.push(b0);R(g,x,top,1,H-top,o.col);}
+  const sh=x=>x>1&&base[x]<base[x-2];
+  if(o.shade){const dep=o.shadeDepth||H;for(let x=1;x<W;x++)if(sh(x)){for(let y=tops[x];y<Math.min(H,tops[x]+dep);y++){const fade=(y-tops[x])/dep;if(BAYER[y&3][x&3]>fade*fade)R(g,x,y,1,1,o.shade);}}}
+  if(o.snow){for(let x=0;x<W;x++){const sl=o.snowLine+Math.round(n(x*.31+99)*6)-3;if(tops[x]<sl)R(g,x,tops[x],1,sl-tops[x],(o.shade&&sh(x))?(o.snowShade||"#B9C8DE"):o.snow);}}
+  return tops;}
+const drift=(x0,sp,t,w)=>{const span=W+w*2;return ((x0+t*sp)%span+span)%span-w;};
+function cloud(g,x,y,s,c,sh){disc(g,x+s*.9,y,s*.6,c);disc(g,x+s*1.6,y-s*.35,s*.75,c);disc(g,x+s*2.4,y,s*.55,c);R(g,x+s*.5,y,s*2.4,s*.55,c);R(g,x+s*.6,y+s*.45,s*2.2,Math.max(1,s*.15),sh);}
+function stars(g,seed,n,maxY,t){const r=RNG(seed);for(let i=0;i<n;i++){const x=Math.floor(r()*W),y=Math.floor(r()*maxY),ph=r()*6,b=Math.sin(t*2+ph);
+  g.fillStyle=b>.6?"#FFFFFF":b>-.2?"#C9D3F2":"#6C78A8";g.fillRect(x,y,1,1);if(b>.93){g.fillRect(x-1,y,3,1);g.fillRect(x,y-1,1,3);}}}
+function shimmer(g,y0,y1,c,t,seed,n){const r=RNG(seed);g.fillStyle=c;for(let i=0;i<n;i++){const y=Math.floor(y0+r()*(y1-y0)),x=r()*W,L=2+Math.floor(r()*5),sp=.5+r();
+  if(Math.sin(t*1.7*sp+i*1.3)>-.3)g.fillRect(Math.floor(x+Math.sin(t*sp+i)*3),y,L,1);}}
+function reflectCol(g,cx,y0,y1,w,c,t){for(let y=y0;y<y1;y+=2){const f=(y-y0)/Math.max(1,y1-y0),ww=Math.max(1,Math.round(w*(1-f*.55))),off=Math.round(Math.sin(t*2+y*.5)*2);
+  if(((y+Math.floor(t*3))%3)!==0)R(g,cx-ww/2+off,y,ww,1,c);}}
+function birds(g,t,seed,n,c,y0,y1,sp){const r=RNG(seed);g.fillStyle=c;for(let i=0;i<n;i++){const bx=Math.round(drift(r()*W,sp*(.7+r()*.6),t,4)),by=Math.round(y0+r()*(y1-y0)+Math.sin(t*1.5+i)*2),up=Math.sin(t*7+i*2)>0;
+  g.fillRect(bx,by,1,1);if(up){g.fillRect(bx-2,by-1,2,1);g.fillRect(bx+1,by-1,2,1);}else{g.fillRect(bx-2,by,2,1);g.fillRect(bx+1,by,2,1);}}}
+function pine(g,x,b,h,c,dk){x=Math.round(x);b=Math.round(b);R(g,x,b-2,1,2,"#3B2A1E");for(let i=0;i<h;i++){const w=Math.floor(i*.32+(i%4)*.35);R(g,x-w,b-h+i-1,w*2+1,1,c);if(w>0)R(g,x-w,b-h+i-1,Math.ceil(w*.6),1,dk);}}
+function tree(g,x,b,r,c,dk,hl){R(g,x,b-r,1,r,"#4A3424");const cy=b-r-Math.round(r*.6);disc(g,x,cy,r,c);disc(g,x+Math.round(r*.35),cy+Math.round(r*.35),Math.max(1,Math.round(r*.6)),dk);if(hl)disc(g,x-Math.round(r*.35),cy-Math.round(r*.35),Math.max(1,Math.round(r*.35)),hl);}
+function oak(g,x,b){R(g,x-1,b-6,2,6,"#4A3626");disc(g,x-4,b-8,4,"#3D6B2E");disc(g,x+3,b-9,5,"#3D6B2E");disc(g,x,b-11,4,"#4F8238");disc(g,x+5,b-7,3,"#2E5222");}
+function rows(g,y0,y1,a,b){let y=Math.round(y0),k=0;while(y<y1){const h=1+Math.floor(k*.5);R(g,0,y,W,h,k%2?a:b);y+=h;k++;}}
+function turbine(g,x,b,h,t,c,ph){x=Math.round(x);R(g,x,b-h,1,h,c);const L=Math.round(h*.45);for(let k=0;k<3;k++){const a=t*1.6+(ph||0)+k*2.094;pline(g,x,b-h,x+Math.cos(a)*L,b-h+Math.sin(a)*L,c);}R(g,x-1,b-h-1,2,2,c);}
+function windpump(g,x,b,h,t){x=Math.round(x);const c="#55585F";pline(g,x-5,b,x-1,b-h,c);pline(g,x+5,b,x+1,b-h,c);for(let y=b-6;y>b-h;y-=6){const w=Math.round(5*(y-(b-h))/h);R(g,x-w,y,w*2+1,1,c);}
+  const cx=x,cy=b-h-2;for(let k=0;k<12;k++){const a=t*2.2+k*Math.PI/6;pline(g,cx,cy,cx+Math.cos(a)*7,cy+Math.sin(a)*7,k%2?"#9AA0AA":"#6E737C");}R(g,cx+3,cy-1,9,2,"#6E737C");R(g,cx+10,cy-3,3,6,"#6E737C");R(g,cx-1,cy-1,2,2,"#3A3D44");}
+function balloon(g,x,y,r,cols){x=Math.round(x);y=Math.round(y);for(let dy=-r;dy<=Math.round(r*.9);dy++){let w=dy<=0?Math.sqrt(r*r-dy*dy):Math.sqrt(Math.max(0,r*r-dy*dy*.6))*(1-dy/(r*1.15));w=Math.max(0,Math.floor(w));
+  for(let dx=-w;dx<=w;dx++){const ci=Math.floor((dx+r)/(2*r+1)*cols.length);g.fillStyle=cols[Math.max(0,Math.min(cols.length-1,ci))];g.fillRect(x+dx,y+dy,1,1);}
+  if(w>0){g.fillStyle="rgba(0,0,0,.18)";g.fillRect(x+w,y+dy,1,1);}}
+  const by=y+Math.round(r*.9)+3;R(g,x-1,by,3,2,"#6B4A2E");R(g,x-1,by-2,1,2,"#6B4A2E");R(g,x+1,by-2,1,2,"#6B4A2E");}
+function lighthouse(g,x,b,h){for(let i=0;i<h;i++){const w=Math.round(3-1.2*(i/h)),band=Math.floor(i/4)%2;R(g,x-w,b-i,w*2+1,1,band?"#C8323C":"#F4F1EA");R(g,x+w,b-i,1,1,band?"#8E1E26":"#C9C3B6");}
+  const top=b-h;R(g,x-3,top-1,7,1,"#1E1E24");R(g,x-2,top-5,5,4,"#FFE58A");R(g,x-2,top-5,1,4,"#1E1E24");R(g,x+2,top-5,1,4,"#1E1E24");R(g,x-2,top-6,5,1,"#1E1E24");R(g,x-1,top-7,3,1,"#1E1E24");R(g,x,top-8,1,1,"#1E1E24");}
+function barn(g,x,b){const h=11;R(g,x-9,b-h,18,h,"#B3302C");R(g,x+5,b-h,4,h,"#8E2422");R(g,x-10,b-h-1,20,1,"#3A2A2A");R(g,x-8,b-h-3,16,2,"#3A2A2A");R(g,x-5,b-h-5,10,2,"#3A2A2A");
+  R(g,x-3,b-7,6,7,"#F2EDE4");pline(g,x-3,b-7,x+2,b-1,"#B3302C");pline(g,x+2,b-7,x-3,b-1,"#B3302C");R(g,x-1,b-h+1,2,2,"#F2EDE4");}
+function silo(g,x,b){R(g,x-3,b-20,6,20,"#C9CCD3");R(g,x+1,b-20,2,20,"#A3A7B0");for(let y=b-16;y<b;y+=5)R(g,x-3,y,6,1,"#A3A7B0");disc(g,x,b-20,3,"#8E949E",true);}
+function sunflower(g,x,b,h){R(g,x,b-h,1,h,"#3F7A2E");R(g,x-3,b-Math.round(h*.5),3,2,"#4E8F35");R(g,x+1,b-Math.round(h*.65),3,2,"#4E8F35");disc(g,x,b-h,4,"#F7C21A");disc(g,x,b-h,2,"#5A3A1A");R(g,x-4,b-h,1,1,"#E39A0E");}
+function adobe(g,x,b){R(g,x-9,b-8,18,8,"#C98552");R(g,x+4,b-8,5,8,"#A96A3E");for(let i=0;i<5;i++)R(g,x-8+i*4,b-7,1,1,"#5A3A22");R(g,x-2,b-5,3,5,"#5A3A22");R(g,x-7,b-5,2,2,"#2F6E8A");}
+function yucca(g,x,b){const c="#6E8B3D";for(let k=-3;k<=3;k++)pline(g,x,b,x+k*2,b-7+Math.abs(k),c);R(g,x,b-14,1,7,"#8C7A4A");for(let i=0;i<4;i++)R(g,x-1+(i%2)*2,b-14+i,1,1,"#F4EBC8");}
+function church(g,x,b){R(g,x-3,b-7,11,7,"#F4F1EA");R(g,x+5,b-7,3,7,"#CFC8BC");for(let k=0;k<4;k++)R(g,x-3+k,b-8-k,12-2*k,1,"#4A3A3A");
+  R(g,x-7,b-13,4,13,"#F4F1EA");R(g,x-6,b-16,2,3,"#F4F1EA");R(g,x-6,b-19,2,3,"#4A3A3A");R(g,x-5,b-20,1,1,"#4A3A3A");R(g,x,b-5,1,2,"#4A3A3A");R(g,x+3,b-5,1,2,"#4A3A3A");R(g,x-6,b-10,2,2,"#4A3A3A");}
+function canoe(g,x,y){x=Math.round(x);y=Math.round(y);const c="#1A1A2E";R(g,x-8,y,16,1,c);R(g,x-7,y+1,14,1,c);R(g,x-9,y-1,1,1,c);R(g,x+8,y-1,1,1,c);R(g,x-1,y-4,2,4,c);R(g,x-1,y-6,2,2,c);pline(g,x+1,y-4,x+5,y+2,c);}
+function sailboat(g,x,y){x=Math.round(x);R(g,x-4,y,9,2,"#F4F1EA");R(g,x-3,y+2,7,1,"#C9C3B6");R(g,x,y-9,1,9,"#5A4A3A");for(let k=0;k<8;k++)R(g,x+1,y-9+k,Math.floor(k*.6)+1,1,"#FFFFFF");for(let k=0;k<6;k++)R(g,x-Math.floor(k*.5)-1,y-7+k,Math.floor(k*.5)+1,1,"#E85D4A");}
+function palm(g,x,b,h,lean){const c="#2A1E36";let px=x;for(let i=0;i<h;i++){px=x+Math.round(lean*(i*i)/(h*1.4));R(g,px,b-i,2,1,c);}
+  const tx=px+1,ty=b-h;[3.05,2.6,2.15,1.65,1.15,.65,.15].forEach((a,k)=>{const L=12+(k*5)%6;for(let s=0;s<L;s++){const fx=tx+Math.cos(a)*s,fy=ty-Math.sin(a)*s*.7+(s*s)/(L*1.3);R(g,fx,fy,1,2,c);if(s%2&&s>2)R(g,fx,fy+2,1,1,c);}});disc(g,tx,ty+2,1,c);}
+function palmetto(g,x,b,h){const c="#151A2C";R(g,x,b-h,2,h,c);for(let i=2;i<h;i+=3)R(g,x-1+(i%2)*3,b-i,1,1,c);const tx=x+1,ty=b-h;
+  for(let k=0;k<14;k++){const a=-Math.PI*1.05+k*(Math.PI*1.1/13),L=8+(k%3)*2;for(let s=0;s<L;s++){const fx=tx+Math.cos(a)*s,fy=ty+Math.sin(a)*s+(s*s)/(L*2.2);R(g,fx,fy,1,1,c);}}disc(g,tx,ty,2,c);}
+function liveOak(g,x,b){const tc="#3A2C22";R(g,x-3,b-30,7,30,tc);pline(g,x,b-28,x+30,b-44,tc);pline(g,x,b-27,x+30,b-43,tc);pline(g,x,b-26,x-20,b-40,tc);pline(g,x,b-25,x-20,b-39,tc);
+  const bl=[[0,-46,16],[22,-50,14],[40,-46,11],[-20,-44,12],[10,-58,12],[-8,-56,10],[32,-56,10]];bl.forEach(([dx,dy,r])=>disc(g,x+dx,b+dy,r,"#2F4A2C"));bl.forEach(([dx,dy,r])=>disc(g,x+dx-2,b+dy-3,Math.round(r*.55),"#3F6138"));
+  const rr=RNG(77);for(let i=0;i<28;i++){const mx=x-30+Math.floor(rr()*78),my=b-44+Math.floor(rr()*10),L=6+Math.floor(rr()*12);for(let k=0;k<L;k++){g.fillStyle=k%3?"#9FAE8A":"#B9C4A3";g.fillRect(mx+(k%4===3?1:0),my+k,1,1);}}}
+function crescent(g,x,y,r){g.fillStyle="#F7F1D2";for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(dx*dx+dy*dy<=r*r&&(dx-4)*(dx-4)+(dy+2)*(dy+2)>(r-1)*(r-1))g.fillRect(x+dx,y+dy,1,1);}}
+function chimneyRock(g,cx,b){for(let k=0;k<18;k++){const w=Math.round(26-k*1.3);R(g,cx-w,b-k,w*2,1,"#C9A67A");R(g,cx+Math.round(w*.35),b-k,Math.round(w*.65),1,"#A9845A");}
+  for(let i=0;i<24;i++){const w=i<16?4:3;R(g,cx-2,b-18-i,w,1,"#C9A67A");R(g,cx-2+w-1,b-18-i,1,1,"#9C7A55");}R(g,cx-2,b-43,4,2,"#9C7A55");}
+function capitol(g,cx,b){const c="#F1E3D3",s="#C9B3A6",d="#8C7484";const ww=Math.min(W-12,110);
+  R(g,cx-ww/2,b-12,ww,12,c);R(g,cx-ww/2-2,b-13,ww+4,1,d);for(let x=Math.round(cx-ww/2+2);x<cx+ww/2-1;x+=3)R(g,x,b-10,1,8,s);
+  R(g,cx-20,b-21,40,21,c);R(g,cx-21,b-22,42,1,d);for(let x=cx-18;x<cx+18;x+=3)R(g,x,b-19,1,10,s);
+  for(let k=0;k<6;k++)R(g,cx-(12-2*k),b-23-k,2*(12-2*k)+1,1,c);
+  R(g,cx-13,b-38,27,10,c);R(g,cx-14,b-39,29,1,d);for(let x=cx-12;x<cx+13;x+=2)R(g,x,b-37,1,8,s);
+  disc(g,cx,b-39,13,c,true);for(let x=cx-9;x<=cx+9;x+=4)R(g,x,b-48,1,8,s);R(g,cx+5,b-50,6,10,"rgba(140,116,132,.35)");
+  R(g,cx-2,b-57,5,6,c);R(g,cx-3,b-52,7,1,d);R(g,cx-1,b-60,3,3,c);R(g,cx,b-63,1,3,d);R(g,cx-10,b-2,20,2,s);}
+function bridge(g,x1,x2,deck){const T1=Math.round(x1+(x2-x1)*.15),T2=Math.round(x1+(x2-x1)*.85),top=deck-20,mid=(T1+T2)/2,half=(T2-T1)/2;
+  for(let x=T1;x<=T2;x++){const y=Math.round(top+16*(1-((x-mid)/half)**2));R(g,x,y,1,1,"#5B9BE8");if(x%3===0)R(g,x,y,1,deck-y,"rgba(91,155,232,.6)");}
+  for(let x=0;x<T1;x++){const f=(T1-x)/Math.max(1,T1),y=Math.round(top+(deck-top)*Math.min(1,f*1.2)*(.6+.4*f));R(g,x,y,1,1,"#5B9BE8");}
+  for(let x=T2;x<Math.min(W,x2+20);x++){const f=(x-T2)/40,y=Math.round(top+(deck-top)*Math.min(1,f));R(g,x,y,1,1,"#5B9BE8");}
+  R(g,0,deck,Math.min(W,x2+20),2,"#3A2E40");for(let x=2;x<x2+18;x+=5)R(g,x,deck-1,1,1,"#FFD27A");
+  [T1,T2].forEach(T=>{R(g,T-3,top-2,7,deck-top+10,"#8C6A58");R(g,T-3,top-2,2,deck-top+10,"#A88470");R(g,T-1,deck-12,3,8,"#22285A");R(g,T-4,top-3,9,1,"#5E4638");});}
+let WIN=[];
+function skyline(g,x0,x1,b,seed){const r=RNG(seed);WIN=[];let x=x0;while(x<x1){const w=5+Math.floor(r()*8),h=Math.floor(Y(.08)+r()*Y(.22)),c=r()<.5?"#2E2D5E":"#26254F";R(g,x,b-h,w,h,c);
+  if(r()<.3)R(g,x+Math.floor(w/2),b-h-4,1,4,c);for(let yy=b-h+2;yy<b-1;yy+=2)for(let xx=x+1;xx<x+w-1;xx+=2){if(r()<.35)R(g,xx,yy,1,1,"#F7D27A");else WIN.push([xx,yy]);}x+=w+(r()<.3?1:0);}}
+function aurora(g,t){for(let x=0;x<W;x++){const y=Y(.2)+Math.sin(x*.035+t*.5)*Y(.07)+Math.sin(x*.09-t*.3)*Y(.03),len=Math.round(Y(.15)+Math.sin(x*.07+t*.8)*Y(.05)),i=.5+.5*Math.sin(x*.05-t*.7);
+  for(let k=0;k<len;k++){const f=k/len;g.globalAlpha=(1-f)*.6*i;g.fillStyle=f<.15?"#B4FFD6":f<.55?"#3DEB9A":"#7A5CE0";g.fillRect(x,Math.round(y+k),1,1);}}g.globalAlpha=1;}
+
+const SCENES={
+US:{cap:"U.S. Capitol at sunset",sky:[[0,"#2F3F8F"],[.4,"#9A5FA8"],[.62,"#F08A6A"],[.78,"#FFC77A"],[1,"#FFE3A6"]],
+ skyDraw(g){disc(g,X(.5),Y(.6),Math.round(H*.09),"#FFE9B0");},
+ back(g,t){cloud(g,drift(W*.1,2,t,40),Y(.18),9,"#F7B7A3","#D98C8C");cloud(g,drift(W*.6,1.4,t,40),Y(.3),7,"#FFC9A8","#E39A8C");birds(g,t,7,5,"#3A2A4A",Y(.2),Y(.4),4);},
+ land(g){const b=Y(.74);R(g,0,b,W,H-b,"#40375E");for(let i=0;i<14;i++){const x=Math.round((i+.5)*W/14);if(Math.abs(x-X(.5))<62)continue;tree(g,x,b+2,5,"#2C2F4F","#22253F");}capitol(g,X(.5),b);
+  R(g,0,Y(.8),W,Y(.9)-Y(.8),"#C9798A");dith(g,0,Y(.8),W,Y(.9)-Y(.8),"#F0A27C",.35);R(g,0,Y(.9),W,H-Y(.9),"#2E2A47");},
+ front(g,t){shimmer(g,Y(.81),Y(.89),"#FFE3A6",t,3,26);}},
+NM:{cap:"Balloons over the Sandia Mountains, Albuquerque",sky:[[0,"#4C6FD1"],[.45,"#8FB3EE"],[.75,"#F6C3A0"],[1,"#FBE0BE"]],
+ skyDraw(g){disc(g,X(.15),Y(.52),9,"#FFF1C9");},
+ back(g,t){cloud(g,drift(W*.5,1.5,t,40),Y(.14),7,"#FFFFFF","#E3D3E6");},
+ land(g){ridge(g,{y:Y(.6),amp:Y(.2),sc:.025,seed:4,col:"#B07AA6",shade:"#8C5E8E",shadeDepth:40});ridge(g,{y:Y(.71),amp:Y(.1),sc:.04,seed:9,col:"#C96E4E",flat:.5,shade:"#A3523A",shadeDepth:5});
+  R(g,0,Y(.74),W,H-Y(.74),"#E2AE72");dith(g,0,Y(.74),W,H-Y(.74),"#CF955A",.3);adobe(g,X(.7),Y(.86));yucca(g,X(.12),Y(.92));yucca(g,X(.9),Y(.95));yucca(g,X(.42),Y(.97));},
+ front(g,t){[[.25,.3,7,["#E63946","#FFD166","#06D6A0","#118AB2"]],[.55,.2,9,["#F72585","#7209B7","#3A0CA3","#4CC9F0","#F72585"]],[.78,.38,6,["#FFB703","#FB8500","#FFB703"]],[.4,.47,5,["#2EC4B6","#FFFFFF","#E71D36"]],[.9,.16,5,["#8338EC","#FFBE0B","#8338EC"]],[.08,.18,4,["#06D6A0","#EF476F"]]]
+  .forEach(([fx,fy,r,c],i)=>balloon(g,X(fx)+Math.sin(t*.4+i)*3,Y(fy)+Math.sin(t*.8+i*1.7)*2,r,c));}},
+NC:{cap:"Blue Ridge Mountains in fall",sky:[[0,"#7DB7EC"],[.6,"#CBE3F6"],[1,"#F6E7CF"]],
+ skyDraw(g){disc(g,X(.78),Y(.2),8,"#FFF6D8");},
+ back(g,t){cloud(g,drift(W*.2,1.2,t,40),Y(.13),8,"#FFFFFF","#DCE7F2");cloud(g,drift(W*.7,.9,t,40),Y(.24),6,"#FFFFFF","#DCE7F2");},
+ land(g){[["#B9CBE8",.5,.12,3],["#9AB3DD",.58,.12,5],["#7A98CC",.66,.12,7],["#5B7AB2",.74,.1,11]].forEach(([c,y,a,s])=>ridge(g,{y:Y(y),amp:Y(a),sc:.03,seed:s,col:c}));
+  const tops=ridge(g,{y:Y(.86),amp:Y(.1),sc:.035,seed:21,col:"#4B5E3A"});const r=RNG(5),cols=["#D9541E","#E8902A","#F2C14E","#B83A26","#7A8F3A","#C96A2B"];
+  for(let x=0;x<W;x+=3)for(let k=0;k<4;k++){const y=tops[x]+3+k*6+Math.floor(r()*4);if(y<H+6)tree(g,x+Math.floor(r()*3),y+4,3+Math.floor(r()*2),cols[Math.floor(r()*cols.length)],"#6B3A22");}},
+ front(g,t){birds(g,t,2,4,"#2B3550",Y(.25),Y(.4),5);}},
+GA:{cap:"Live oaks and salt marsh on the Georgia coast",sky:[[0,"#5E8FD6"],[.5,"#F3C47A"],[.8,"#F59A5C"],[1,"#F7B977"]],
+ skyDraw(g){disc(g,X(.64),Y(.6),10,"#FFE29A");},
+ back(g,t){cloud(g,drift(W*.3,1,t,40),Y(.28),7,"#FFD6A0","#E9A06E");birds(g,t,8,3,"#4A3528",Y(.3),Y(.45),4);},
+ land(g){ridge(g,{y:Y(.63),amp:Y(.03),sc:.08,seed:2,col:"#3E5A3A",oct:2});const wy=Y(.64);R(g,0,wy,W,H-wy,"#E9A066");dith(g,0,wy,W,Y(.8)-wy,"#F6C17A",.4);
+  const r=RNG(12);for(let y=Y(.68);y<H;y+=2){if(y>Y(.73)&&y<Y(.77))continue;for(let x=0;x<W;x++)if(r()<.6){g.fillStyle=r()<.5?"#B9A24A":"#8E8A3A";g.fillRect(x,y,1,1+Math.floor(r()*2));}}
+  liveOak(g,X(.16),Y(1.0));},
+ front(g,t){shimmer(g,Y(.65),Y(.68),"#FFE6B0",t,4,10);shimmer(g,Y(.735),Y(.77),"#FFE6B0",t,5,10);reflectCol(g,X(.64),Y(.645),Y(.68),8,"#FFE29A",t);}},
+NH:{cap:"White Mountains at peak foliage",sky:[[0,"#6EA7E6"],[1,"#DCEBF8"]],
+ back(g,t){cloud(g,drift(W*.15,1.3,t,40),Y(.13),8,"#FFFFFF","#D7E3F0");cloud(g,drift(W*.65,.8,t,40),Y(.24),6,"#FFFFFF","#D7E3F0");},
+ land(g){ridge(g,{y:Y(.56),amp:Y(.22),sc:.025,seed:31,col:"#7F90B0",peak:true,shade:"#6A7A99",shadeDepth:30});const tops=ridge(g,{y:Y(.67),amp:Y(.08),sc:.04,seed:33,col:"#5C6B3A"});
+  const r=RNG(9),cols=["#E0531F","#F08A24","#F7C548","#C0392B","#9C4A1A","#6C8A35"];for(let x=0;x<W;x+=2)for(let k=0;k<4;k++){const y=tops[x]+2+k*4+Math.floor(r()*3);if(y<Y(.72))disc(g,x,y,2,cols[Math.floor(r()*cols.length)]);}
+  const ly=Y(.72);R(g,0,ly,W,Y(.9)-ly,"#5A8CC2");g.globalAlpha=.35;for(let x=0;x<W;x+=2)for(let k=0;k<3;k++)if(r()<.6){g.fillStyle=cols[Math.floor(r()*cols.length)];g.fillRect(x,ly+1+k*2,2,1);}g.globalAlpha=1;
+  church(g,X(.74),ly);R(g,0,Y(.9),W,H-Y(.9),"#3E5A34");for(let i=0;i<9;i++)pine(g,Math.round(i*W/8+(i%2)*3),H+1,18+(i%3)*6,"#24402A","#1B3220");},
+ front(g,t){shimmer(g,Y(.73),Y(.89),"#CFE3F6",t,6,24);}},
+AK:{cap:"Northern lights over Denali",sky:[[0,"#050A1E"],[.55,"#0D1B3B"],[1,"#1F3A5F"]],
+ back(g,t){stars(g,3,70,Y(.55),t);aurora(g,t);},
+ land(g){ridge(g,{y:Y(.66),amp:Y(.32),sc:.018,seed:41,col:"#33456A",peak:true,shade:"#26365A",shadeDepth:60,snow:"#D7E3F4",snowShade:"#9FB2CF",snowLine:Y(.47)});ridge(g,{y:Y(.71),amp:Y(.06),sc:.05,seed:43,col:"#1C2B44"});
+  const ly=Y(.74);R(g,0,ly,W,Y(.86)-ly,"#0F2140");R(g,0,Y(.86),W,H-Y(.86),"#0A1420");for(let i=0;i<W;i+=4)pine(g,i,Y(.88)+((i*13)%5),10+((i*37)%9),"#0E2026","#081418");},
+ front(g,t){g.globalAlpha=.3;g.fillStyle="#46F0A0";for(let x=0;x<W;x++){const v=Math.sin(x*.05+t*.6)+Math.sin(x*.13-t*.4);if(v>.6)g.fillRect(x,Y(.75)+((x*7)%8),1,1);}g.globalAlpha=1;shimmer(g,Y(.75),Y(.85),"#2E5F7A",t,8,14);}},
+IA:{cap:"Iowa farm country at harvest",sky:[[0,"#5FA8F0"],[1,"#D6EDFB"]],
+ back(g,t){cloud(g,drift(W*.2,1.5,t,40),Y(.13),9,"#FFFFFF","#D9E6F2");cloud(g,drift(W*.7,1,t,40),Y(.27),6,"#FFFFFF","#D9E6F2");},
+ land(g){ridge(g,{y:Y(.62),amp:Y(.05),sc:.02,seed:51,col:"#8FB35A",oct:2});ridge(g,{y:Y(.69),amp:Y(.05),sc:.03,seed:52,col:"#C9B04A",oct:2});rows(g,Y(.73),H,"#D9B44A","#B48E2C");
+  tree(g,X(.3)-16,Y(.75),5,"#3F6B2E","#2E5222");barn(g,X(.3),Y(.75));silo(g,X(.3)+14,Y(.75));},
+ front(g,t){turbine(g,X(.62),Y(.63),26,t,"#F4F6FA",0);turbine(g,X(.78),Y(.62),22,t,"#F4F6FA",1.3);turbine(g,X(.93),Y(.64),18,t,"#F4F6FA",2.1);}},
+KS:{cap:"Wheat fields and wind turbines on the plains",sky:[[0,"#2C3C78"],[.45,"#C7697A"],[.75,"#F4A259"],[1,"#FFE0A0"]],
+ skyDraw(g){disc(g,X(.5),Y(.66),13,"#FFE9A8");},
+ back(g,t){cloud(g,drift(W*.1,.8,t,40),Y(.3),8,"#F59B7A","#C76A6E");birds(g,t,4,5,"#3A2440",Y(.25),Y(.4),4);},
+ land(g){rows(g,Y(.66),H,"#E3B653","#C08E36");for(let y=Y(.84);y<H;y+=3)for(let x=y%2;x<W;x+=3){R(g,x,y-2,1,3,"#8E6A26");R(g,x,y-3,1,1,"#F2CF7A");}
+  sunflower(g,X(.07),H-2,22);sunflower(g,X(.15),H,16);sunflower(g,X(.93),H-1,20);},
+ front(g,t){[[.2,.665,30,0],[.38,.665,24,1],[.66,.665,26,2],[.82,.665,20,.7]].forEach(([fx,fy,h,p])=>turbine(g,X(fx),Y(fy),h,t*.7,"#2A2240",p));}},
+ME:{cap:"Lighthouse on the rocky Maine coast",sky:[[0,"#4F86CF"],[1,"#D3E6F6"]],
+ back(g,t){cloud(g,drift(W*.3,1.2,t,40),Y(.15),8,"#FFFFFF","#D2DEEC");birds(g,t,6,4,"#FFFFFF",Y(.2),Y(.45),6);},
+ land(g){R(g,0,Y(.6),W,H-Y(.6),"#2C5B8C");dith(g,0,Y(.6),W,Y(.66)-Y(.6),"#4F7FB3",.5);const cx=X(.6),ct=Y(.6)-14;
+  for(let x=cx-40;x<W;x++){const top=Math.round(ct+Math.max(0,cx-x)*1.2+Math.sin(x*.4)*1.5);R(g,x,top,1,H-top,"#6E6A66");R(g,x,top,1,1,"#8C8884");for(let y=top+3;y<H;y++)if(BAYER[y&3][x&3]<.2+.15*Math.sin(y*.3+x*.2))R(g,x,y,1,1,"#55524F");}
+  for(let x=cx-36;x<cx+6;x+=6)disc(g,x,H-5-(x%4),6,"#4F4C4A");for(let i=0;i<7;i++)pine(g,X(.76)+i*5,ct+2,14+(i%3)*4,"#22432F","#18311F");lighthouse(g,X(.66),ct,30);},
+ front(g,t){shimmer(g,Y(.61),H,"#BFD8F0",t,7,30);const lx=X(.66),ly=Y(.6)-14-33,a=Math.PI+Math.sin(t*.8)*.5;g.globalAlpha=.2;g.fillStyle="#FFF4C2";
+  for(let k=0;k<80;k++){const w=Math.floor(k*.16);g.fillRect(Math.round(lx+Math.cos(a)*k),Math.round(ly+Math.sin(a)*k*.3-w/2),1,w+1);}g.globalAlpha=1;
+  const cx=X(.6);for(let x=cx-40;x<cx;x+=2)if(Math.sin(t*2+x*.3)>.3)R(g,x,Math.round(Y(.6)-14+(cx-x)*1.2),2,1,"#FFFFFF");}},
+MI:{cap:"Sand dunes above Lake Michigan",sky:[[0,"#4C93E0"],[1,"#C6E4F8"]],
+ back(g,t){cloud(g,drift(W*.2,1.3,t,40),Y(.12),9,"#FFFFFF","#D4E4F2");cloud(g,drift(W*.7,.8,t,40),Y(.22),7,"#FFFFFF","#D4E4F2");},
+ land(g){R(g,0,Y(.58),W,H-Y(.58),"#1F6FB2");dith(g,0,Y(.66),W,Y(.76)-Y(.66),"#2A9BC4",.5);R(g,0,Y(.74),W,Y(.8)-Y(.74),"#4EC0D0");
+  for(let x=0;x<W;x++){const top=Math.round(Y(.5)+(x/W)*Y(.42)+Math.sin(x*.05)*3);R(g,x,top,1,H-top,"#E6C88E");R(g,x,top,1,2,"#F3DDB0");}dith(g,0,Y(.7),W,H-Y(.7),"#D7B47C",.18);
+  const r=RNG(3);for(let i=0;i<50;i++){const x=Math.floor(r()*W*.75),top=Math.round(Y(.5)+(x/W)*Y(.42)),y=top+3+Math.floor(r()*24);R(g,x,y-3,1,3,"#5E8C3A");R(g,x-1,y-2,1,2,"#7AA548");R(g,x+1,y-2,1,2,"#7AA548");}},
+ front(g,t){shimmer(g,Y(.59),Y(.8),"#BFE6F7",t,9,30);sailboat(g,drift(W*.6,1.5,t,10),Y(.62));}},
+MN:{cap:"A Northwoods lake at dusk",sky:[[0,"#232766"],[.45,"#7E4F96"],[.8,"#EE8A5E"],[1,"#FBC784"]],
+ back(g,t){stars(g,11,25,Y(.3),t);},
+ land(g){const ly=Y(.62),n=noise(61);for(let x=0;x<W;x+=3)pine(g,x,ly+1,8+Math.round(n(x*.08)*10),"#1D1F3D","#16182F");grad(g,[[0,"#F4A876"],[.4,"#9B5C92"],[1,"#2A2C68"]],ly+1,H,12);
+  g.globalAlpha=.55;for(let x=0;x<W;x+=3)R(g,x-1,ly+1,3,Math.round((8+Math.round(n(x*.08)*10))*.6),"#1D1F3D");g.globalAlpha=1;},
+ front(g,t){shimmer(g,Y(.64),H,"#FCD3A0",t,13,30);canoe(g,X(.6)+Math.sin(t*.3)*6,Y(.8)+Math.round(Math.sin(t*1.2)));}},
+OH:{cap:"Cincinnati and the Roebling Bridge on the Ohio River",sky:[[0,"#191C48"],[.55,"#4A3B7C"],[.85,"#D9766E"],[1,"#F2A27A"]],
+ back(g,t){stars(g,21,20,Y(.3),t);},
+ land(g){ridge(g,{y:Y(.6),amp:Y(.08),sc:.03,seed:71,col:"#2B2A55"});skyline(g,X(.22),X(.98),Y(.69),5);R(g,0,Y(.69),W,H-Y(.69),"#22285A");bridge(g,X(.02),X(.72),Y(.75));R(g,0,Y(.93),W,H-Y(.93),"#1A1B3A");},
+ front(g,t){shimmer(g,Y(.7),Y(.92),"#F2C46B",t,23,40);const k=Math.floor(t*2);for(let i=0;i<WIN.length;i+=5){const [x,y]=WIN[i];if(((i*31+k)%9)===0)R(g,x,y,1,1,"#FFE6A0");}}},
+TX:{cap:"Bluebonnets in the Texas Hill Country",sky:[[0,"#5398E3"],[1,"#D5EBFA"]],
+ back(g,t){cloud(g,drift(W*.25,1.2,t,40),Y(.13),9,"#FFFFFF","#D6E4F1");cloud(g,drift(W*.75,.7,t,40),Y(.24),6,"#FFFFFF","#D6E4F1");},
+ land(g){ridge(g,{y:Y(.6),amp:Y(.06),sc:.02,seed:81,col:"#7FA36A",oct:2});const tops=ridge(g,{y:Y(.68),amp:Y(.05),sc:.03,seed:82,col:"#6C9A4A",oct:2});
+  for(let i=0;i<5;i++){const x=Math.round((i*.23+.06)*W);oak(g,x,tops[Math.min(W-1,x)]+3);}R(g,0,Y(.74),W,H-Y(.74),"#5E8E3E");const r=RNG(8),y0=Y(.75);
+  for(let y=y0;y<H;y++){const d=(y-y0)/(H-y0);for(let x=0;x<W;x++){if(r()<.28+d*.32){const q=r();g.fillStyle=q<.78?"#2F5BC8":q<.9?"#FFFFFF":"#E2553A";g.fillRect(x,y,1,1);if(d>.55&&q<.78){g.fillStyle="#5B82E0";g.fillRect(x,y-1,1,1);}}}}},
+ front(g,t){windpump(g,X(.72),Y(.71),30,t);birds(g,t,3,3,"#2E3D55",Y(.2),Y(.35),5);}},
+FL:{cap:"Palms at sunset on the Gulf Coast",sky:[[0,"#4D3F9E"],[.4,"#E3608E"],[.75,"#F6A06A"],[1,"#FFD27A"]],
+ skyDraw(g){disc(g,X(.5),Y(.63),12,"#FFE08A");},
+ back(g,t){cloud(g,drift(W*.15,.9,t,40),Y(.3),8,"#F78FA0","#C75A86");birds(g,t,5,4,"#2A1E3A",Y(.22),Y(.4),4);},
+ land(g){const sy=Y(.63);R(g,0,sy,W,Y(.82)-sy,"#5D4B9E");dith(g,0,sy,W,Y(.82)-sy,"#C56A9A",.3);R(g,0,Y(.82),W,H-Y(.82),"#F0CFA0");dith(g,0,Y(.86),W,H-Y(.86),"#D9B27C",.25);
+  palm(g,X(.1),H-2,46,.6);palm(g,X(.22),H,34,-.4);palm(g,X(.88),H-1,50,-.7);},
+ front(g,t){reflectCol(g,X(.5),Y(.64),Y(.82),18,"#FFD27A",t);shimmer(g,Y(.65),Y(.81),"#F7A6B8",t,15,24);for(let x=0;x<W;x++){if(Math.sin(x*.3+t*2)>-.2)R(g,x,Y(.82)+Math.round(Math.sin(x*.1+t*1.5)*1.5),1,1,"#FFFFFF");}}},
+SC:{cap:"Palmettos and a crescent moon over the Lowcountry",sky:[[0,"#0F2350"],[.6,"#38558F"],[.9,"#B27C9E"],[1,"#E7A99A"]],
+ skyDraw(g){crescent(g,X(.25),Y(.17),9);},
+ back(g,t){stars(g,31,40,Y(.5),t);},
+ land(g){ridge(g,{y:Y(.66),amp:Y(.03),sc:.06,seed:91,col:"#1D2A45",oct:2});const wy=Y(.67);R(g,0,wy,W,H-wy,"#5C5E7E");const r=RNG(44);
+  for(let y=wy+2;y<H;y++){const cx=X(.5)+Math.round(Math.sin(y*.12)*W*.15),cw=Math.max(2,Math.round((y-wy)*.25));for(let x=0;x<W;x++){if(Math.abs(x-cx)<cw)continue;if(r()<.7){g.fillStyle=r()<.5?"#3E4A3A":"#56603F";g.fillRect(x,y,1,1);}}}
+  palmetto(g,X(.72),Y(.96),48);palmetto(g,X(.86),Y(.9),36);palmetto(g,X(.1),Y(.98),40);},
+ front(g,t){shimmer(g,Y(.7),H,"#C9A3B8",t,32,18);}},
+NE:{cap:"Chimney Rock on the Nebraska prairie",sky:[[0,"#5C9DE5"],[.7,"#BFD9F0"],[1,"#F2E1B8"]],
+ back(g,t){cloud(g,drift(W*.2,1,t,40),Y(.12),9,"#FFFFFF","#D9E3EE");cloud(g,drift(W*.6,.6,t,40),Y(.24),7,"#FFFFFF","#D9E3EE");},
+ land(g){ridge(g,{y:Y(.66),amp:Y(.06),sc:.03,seed:101,col:"#B79D80",flat:.7});chimneyRock(g,X(.55),Y(.72));R(g,0,Y(.72),W,H-Y(.72),"#B9A35A");dith(g,0,Y(.72),W,H-Y(.72),"#8E9A4A",.4);
+  const r=RNG(6);for(let i=0;i<W*1.4;i++){const x=Math.floor(r()*W),y=Y(.76)+Math.floor(r()*(H-Y(.76)));R(g,x,y-2,1,2,r()<.5?"#D8C27A":"#7E8A3E");}},
+ front(g,t){birds(g,t,17,5,"#4A4A5A",Y(.18),Y(.34),3);}},
+MT:{cap:"Glacier National Park",sky:[[0,"#3A82D4"],[1,"#CFE7F8"]],
+ back(g,t){cloud(g,drift(W*.3,1,t,40),Y(.1),8,"#FFFFFF","#D7E4F0");},
+ land(g){ridge(g,{y:Y(.62),amp:Y(.34),sc:.03,seed:111,col:"#5B6C87",peak:true,oct:4,shade:"#46546E",shadeDepth:60,snow:"#EEF4FB",snowShade:"#BCCADD",snowLine:Y(.4)});
+  ridge(g,{y:Y(.67),amp:Y(.1),sc:.04,seed:113,col:"#355443"});const ly=Y(.68);R(g,0,ly,W,Y(.86)-ly,"#2E9DB0");dith(g,0,ly,W,Y(.72)-ly,"#5FC1CF",.4);
+  R(g,0,Y(.86),W,H-Y(.86),"#2C4A33");for(let i=0;i<W;i+=5)pine(g,i+((i*7)%3),H+2-((i*11)%6),16+((i*13)%10),"#1F3A28","#152A1C");},
+ front(g,t){shimmer(g,Y(.69),Y(.85),"#D8F1F6",t,33,26);birds(g,t,19,1,"#2A2A2A",Y(.14),Y(.24),6);}}
+};
+
+function build(){const sg=skyC.getContext("2d");grad(sg,scene.sky,0,H);if(scene.skyDraw)scene.skyDraw(sg);
+  const lg=landC.getContext("2d");lg.clearRect(0,0,W,H);scene.land(lg);}
+function frame(t){g0.imageSmoothingEnabled=false;g0.globalAlpha=1;g0.drawImage(skyC,0,0);if(scene.back)scene.back(g0,t);g0.drawImage(landC,0,0);if(scene.front)scene.front(g0,t);
+  if(fading){const p=Math.min(1,(performance.now()-fadeT0)/FADE);if(p>=1)fading=false;else{g0.globalAlpha=1-p;g0.drawImage(prevC,0,0);g0.globalAlpha=1;}}}
+function set(k){if(!SCENES[k])k="US";if(k===key)return;
+  if(key&&!reduce){const pg=prevC.getContext("2d");pg.clearRect(0,0,W,H);pg.drawImage(cv,0,0);fading=true;fadeT0=performance.now();}
+  key=k;scene=SCENES[k];try{build();frame(performance.now()/1000);}catch(e){}}
+function size(){H=200;W=Math.max(120,Math.min(440,Math.round(H*innerWidth/Math.max(1,innerHeight))));[cv,skyC,landC,prevC].forEach(c=>{c.width=W;c.height=H;});
+  if(scene){fading=false;try{build();frame(performance.now()/1000);}catch(e){}}}
+function loop(now){if(!document.hidden&&now-last>90){last=now;try{frame(now/1000);}catch(e){}}requestAnimationFrame(loop);}
+addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(size,150);});
+size();if(!reduce)requestAnimationFrame(loop);
+return {set,cap:k=>(SCENES[k]||SCENES.US).cap};
+})();
+
+/* ---------------- SOUND ---------------- */
+let actx=null;
+function beep(notes){
+  if(!sound) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    let t=actx.currentTime;
+    notes.forEach(([f,d])=>{
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.type="square"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.045,t); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d); t+=d*0.9;
+    });
+  }catch(e){}
+}
+const SFX={nav:()=>beep([[440,.04]]), pick:()=>beep([[523,.06],[659,.06],[784,.11]]), done:()=>beep([[523,.07],[659,.07],[784,.07],[1047,.2]]), start:()=>beep([[392,.06],[523,.11]])};
+
+function hash(s){let h=0;for(const ch of s)h=(h*31+ch.charCodeAt(0))>>>0;return h;}
+/* ---------------- PICK ANIMATIONS (8 frames, play only for the picked candidate) ---------------- */
+const NF=8;
+const ACTS={
+ /* Zia sun sign: New Mexico */
+ "Ben Ray Luján":(D,f)=>{D.arm("R","out");D.P(22,15,D.sk);const red=f<4;const c=red?"#D6202E":"#3E9B2E",C=red?"#FF7A6E":"#7ED45E",d=red?"#9A1420":"#2A6E1E";
+   const y=1+(f%4<2?0:1);
+   PIX(D,20,y,["..g..","..gg.","gGGGg","cCCcc","cCCcd","cCccd",".Cccd",".cccd",".ccd.","..cd.","..cd.","...d.","..d.."],{g:"#2E6B22",G:"#4E9A38",c,C,d});
+   if(f===0||f===4){[[18,y+3],[26,y+5],[25,y+1],[18,y+9]].forEach(([x,yy])=>D.P(x,yy,"#FFE58A"));}
+   else{const k=f%4;D.P(26,y+4-k,"#F08A3A");D.P(17,y+6-k,"#F2B705");}},
+ /* tips a cowboy hat: rancher-style oil and gas man */
+ "Larry Marker":(D,f)=>{const up=f>=2&&f<=5?2:0;const c="#8C6238",b="#5C3E22";D.R(4,4-up,16,1,c);D.R(5,5-up,14,1,b);D.R(8,1-up,8,3,c);D.R(9,0-up,6,1,c);D.R(8,3-up,8,1,"#3A2A1A");
+   if(up){D.arm("R","none");D.R(18,5,2,12,D.suitd);D.R(18,3,2,2,D.sk);}},
+ /* Air Force flyover */
+ "Alani Bankhead":(D,f)=>{D.arm("R","up");const k=D.t%15,x=-13+k*3,y=-2;D.R(x,y+1,7,1,"#9AA3B5");D.R(x+5,y,2,1,"#C8D0DC");D.R(x+2,y-1,2,1,"#6E7788");D.R(x+2,y+2,2,1,"#6E7788");D.P(x+7,y+1,"#C8D0DC");
+   for(let k=1;k<6;k++)if(x-k*2>=-4)D.P(x-k*2,y+1,k%2?"#FFFFFF":"#E2E8F0");},
+ /* university president: mortarboard toss */
+ "Seth Bodnar":(D,f)=>{const ys=[3,-1,-3,-4,-3,-1,1,3];const y=ys[f];if(f<3)D.arm("R","up");
+   D.R(6,y,12,1,"#1F1F26");D.R(8,y-1,8,1,"#1F1F26");D.R(9,y+1,6,2,"#2A2A33");D.P(16,y,"#F2C14E");D.P(17,y+1,"#F2C14E");D.P(17,y+2,"#F2C14E");},
+ /* former U.S. attorney: scales of justice */
+ "Kurt Alme":(D,f)=>{D.arm("R","out");const t=[0,1,1,0,0,-1,-1,0][f];const g="#E2B23A",gd="#9C7A20";D.R(23,6,1,10,gd);D.R(21,16,5,1,gd);
+   D.line(19,8-t,27,8+t,g);D.P(23,5,g);[[19,8-t],[27,8+t]].forEach(([x,y])=>{D.P(x,y+1,gd);D.P(x,y+2,gd);D.R(x-2,y+3,5,1,g);D.R(x-1,y+4,3,1,gd);});},
+ /* six statewide wins: stars pop in one by one */
+ "Roy Cooper":(D,f)=>{D.arm("R","thumb");const pos=[[2,2],[5,-1],[10,-3],[14,-3],[19,-1],[22,2]];const n=Math.min(6,f+1);
+   for(let i=0;i<n;i++){const [x,y]=pos[i],c=(f>=6&&(i+f)%2)?"#FFFFFF":"#F7C21A";D.P(x,y,c);D.P(x-1,y,c);D.P(x+1,y,c);D.P(x,y-1,c);D.P(x,y+1,c);}},
+ /* former RNC chair: convention balloon drop */
+ "Michael Whatley":(D,f)=>{D.arm("R","up");D.arm("L","up");
+   /* convention balloon drop: oval balloons with a shine, a knot and a wavy string, swaying as they fall */
+   const cols=[["#DC2F3A","#FF8A92","#9A1C24"],["#FFFFFF","#FFFFFF","#C9CED8"],["#2152E0","#8DA9FF","#14348F"]];
+   [[-4,0],[0,16],[19,7],[23,24],[-2,26],[21,33]].forEach(([x0,o],k)=>{const y=((f*2+o)%36)-8, x=x0+((Math.floor((f+k)/2))%2);const [c,h,d]=cols[k%3];
+     PIX(D,x,y,[".ccc.","chhcc","chccd","cccdd",".cdd.","..d.."],{c,h,d});
+     D.Pn(x+2,y+6,"#6E7380");D.Pn(x+3,y+7,"#6E7380");D.Pn(x+2,y+8,"#6E7380");D.Pn(x+3,y+9,"#6E7380");});},
+ /* documentary producer: clapperboard */
+ "Jon Ossoff":(D,f)=>{D.arm("R","out");
+   /* film clapperboard: chalk slate, diagonal-striped clapsticks hinged at the left, snaps shut */
+   const W="#F4F6FA",K="#3A3D46";const st=(i,r)=>(Math.floor((i+r)/2)%2)?W:K;
+   PIX(D,18,11,["sssssssss","swwws.wws","sssssssss","sww.wwwws","sssssssss","swwww.wws"],{s:"#2E3038",w:"#C9CED8",".":"#2E3038"});
+   for(let i=0;i<10;i++)for(let r=0;r<3;r++)D.P(18+i,8+r,st(i,r));
+   const open=f<4;
+   if(open){const ang=[.5,.62,.5,.4][f];for(let i=0;i<10;i++)for(let r=0;r<3;r++){const x=Math.round(18+Math.cos(ang)*i),y=Math.round(7-Math.sin(ang)*i)-r;D.P(x,y,st(i,r));}}
+   else{for(let i=0;i<10;i++)for(let r=0;r<3;r++)D.P(18+i,5+r,st(i,r));
+     if(f===4){[[17,3],[23,2],[27,4]].forEach(([x,y])=>D.P(x,y,"#FFE58A"));}}},
+ /* trucking business owner: a rig rolls by */
+ "Mike Collins":(D,f)=>{const x=-14+f*5,y=27;D.R(x,y,10,4,"#F2F2F4");D.R(x,y+3,10,1,"#C9CCD6");D.R(x+10,y+1,4,3,"#DC2F3A");D.R(x+11,y+1,2,1,"#BFE3FF");D.R(x+13,y+2,1,2,"#9A1C24");
+   [x+1,x+7,x+11].forEach(wx=>{D.R(wx,y+4,2,1,"#1F1F26");});if(f%4===1){D.P(x+15,y,"#4A4F62");D.P(x+16,y-1,"#4A4F62");D.P(x+16,y+1,"#4A4F62");}},
+ /* family restaurant: serves a plate of chicken tenders */
+ "Chris Pappas":(D,f)=>{D.arm("R","out");D.R(20,15,8,1,"#FFFFFF");D.R(21,16,6,1,"#D9DCE3");D.R(21,13,2,2,"#D9952E");D.R(23,14,3,1,"#E8A93A");D.R(24,13,2,1,"#C47F22");
+   for(let k=0;k<2;k++){const sx=22+k*3,o=(f+k*3)%6;D.P(sx+(o%2),11-o,"rgba(255,255,255,.85)");D.P(sx+((o+1)%2),10-o,"rgba(255,255,255,.6)");}},
+ /* MIT-trained engineer: spinning gear */
+ "John E. Sununu":(D,f)=>{const cx=12,cy=-1,c="#8E95A3",d="#5E6575";D.disc(cx,cy,3,c);D.disc(cx,cy,1,d);
+   const a=f*Math.PI/8;for(let k=0;k<8;k++){const t=a+k*Math.PI/4;D.P(Math.round(cx+Math.cos(t)*4.4),Math.round(cy+Math.sin(t)*4.4),c);}},
+ /* commercial fisher: a salmon leaps */
+ "Mary Peltola":(D,f)=>{D.arm("R","up");const pts=[[18,30],[20,24],[22,20],[24,18],[26,20],[27,24],[28,29],[28,33]];const [x,y]=pts[f];
+   D.R(x-2,y,5,2,"#E8665A");D.R(x-1,y-1,3,1,"#F4A094");D.P(x+3,y,"#C9463C");D.P(x+3,y+1,"#C9463C");D.P(x-3,y-1,"#C9463C");D.P(x-3,y+2,"#C9463C");D.P(x+2,y,"#1F1F26");
+   if(f===0||f===6){D.P(17,29,"#BFE3FF");D.P(19,28,"#BFE3FF");D.P(21,29,"#BFE3FF");}},
+ /* Marine Corps veteran: crisp salute */
+ "Dan Sullivan":(D,f)=>{if(f>=1&&f<=6)D.arm("R","salute");},
+ /* Paralympic wheelchair basketball: dribbling */
+ "Josh Turek":(D,f)=>{D.arm("R","out");const ys=[18,21,24,27,24,21,18,17];const y=ys[f];D.disc(23,y,1.8,"#E8762A");D.P(23,y-1,"#B5541A");D.P(23,y,"#B5541A");D.P(23,y+1,"#B5541A");D.P(22,y,"#B5541A");D.P(24,y,"#B5541A");D.P(22,y-1,"#F59A52");},
+ /* former TV news anchor: mic and ON AIR light */
+ "Ashley Hinson":(D,f)=>{D.arm("R","mic");D.R(14,10,2,2,"#3E434E");D.P(14,10,"#A6ACB8");D.R(15,12,1,2,"#1F1F26");const on=f%4<2;D.R(19,-3,9,4,on?"#E53946":"#7A2A30");
+   D.R(20,-2,7,2,on?"#FF8A92":"#9A3A40");},
+ /* pastor: reads from an open book */
+ "Adam Hamilton":(D,f)=>{D.arm("R","hold");D.arm("L","hold");
+   /* open book held level at the chest, seen edge-on; one page sweeps up from the right, over the spine, and down to the left */
+   const W="#F7F4EC",G="#D8D1C2",B="#7A3A2A";
+   D.R(7,18,4,1,W);D.R(13,18,4,1,W);D.R(5,19,6,1,W);D.R(13,19,6,1,W);D.R(11,19,2,1,G);
+   D.R(5,20,14,1,G);D.R(4,21,16,1,B);
+   const ang=[null,.35,1.0,1.6,2.2,2.8,null,null][f];
+   if(ang!=null){const bend=Math.sin(ang)*1.2;for(let s=1;s<=6;s++){const x=Math.round(12+Math.cos(ang)*s),y=Math.round(18-Math.sin(ang)*s+(s>3?bend*(s-3)/3:0));D.P(x,y,"#FFFFFF");D.P(x+(Math.cos(ang)>0?1:-1),y,"#A3A8B4");}}},
+ /* physician: stethoscope and a beating heart */
+ "Roger Marshall":(D,f)=>{D.arm("R","out");const tb="#8E9BB4",tk="#5E6A82",m="#D5DAE2";
+   D.P(9,14,tk);D.P(14,14,tk);D.R(9,15,1,4,tb);D.R(14,15,1,4,tb);D.P(10,19,tb);D.P(13,19,tb);D.R(11,20,2,1,m);
+   D.line(12,21,15,23,tb);D.line(15,23,20,19,tb);D.line(20,19,22,17,tb);
+   PIX(D,21,15,[".mm.","mMMm","mMMm",".mm."],{m:"#9AA2B2",M:"#E2E6EE"});
+   const big=f%4<2;const hx=24,hy=9;if(big){D.R(hx-2,hy-1,2,2,"#E53946");D.R(hx+1,hy-1,2,2,"#E53946");D.R(hx-2,hy+1,5,1,"#E53946");D.R(hx-1,hy+2,3,1,"#E53946");D.P(hx,hy+3,"#E53946");D.R(hx-1,hy,3,1,"#E53946");}
+   else{D.P(hx-1,hy,"#E53946");D.P(hx+1,hy,"#E53946");D.R(hx-1,hy+1,3,1,"#E53946");D.P(hx,hy+2,"#E53946");}},
+ /* logger from Allagash: chops a log */
+ "Troy Jackson":(D,f)=>{D.R(20,27,7,3,"#8C5A32");D.R(20,27,1,3,"#C9955E");D.R(26,27,1,3,"#C9955E");
+   if(f<4){D.arm("R","up");D.R(19,2,1,8,"#7A4A21");D.R(17,1,4,2,"#B8BCC4");}else{D.arm("R","out");D.R(21,16,1,10,"#7A4A21");D.R(20,25,3,2,"#B8BCC4");
+   if(f<6){D.P(19,24,"#E0B07A");D.P(25,25,"#E0B07A");D.P(18,22,"#C9955E");}}},
+ /* known for never missing a vote: casts AYE */
+ "Susan Collins":(D,f)=>{const up=f%4<2;D.arm("R",up?"up":"out");const x=up?17:21,y=up?2:11;D.R(x,y,6,5,"#2E9E5A");D.R(x+1,y+1,4,3,"#3FC07A");D.P(x+1,y+2,"#FFFFFF");D.P(x+2,y+3,"#FFFFFF");D.P(x+3,y+2,"#FFFFFF");D.P(x+4,y+1,"#FFFFFF");},
+ /* public health director turned organizer: megaphone */
+ "Abdul El-Sayed":(D,f)=>{D.arm("R","out");D.R(21,15,2,3,"#E8E8EC");D.R(23,14,2,5,"#E8E8EC");D.R(25,13,1,7,"#DC2F3A");D.R(22,15,1,3,"#C9CCD6");
+   const r=f%4;for(let k=0;k<=r;k++){const x=27+k*2;D.P(x,16,"#4A4F62");D.P(x,14-k,"#4A4F62");D.P(x,18+k,"#4A4F62");}},
+ /* former FBI agent: shades drop into place */
+ "Mike Rogers":(D,f)=>{const y=Math.min(8,f*2+0);if(f<4){D.R(8,y-6+2,8,2,"#16151C");}else{D.R(8,8,3,2,"#16151C");D.R(13,8,3,2,"#16151C");D.R(11,8,2,1,"#16151C");D.P(7,8,"#16151C");D.P(16,8,"#16151C");
+   if(f===5){D.P(9,8,"#FFFFFF");D.P(14,8,"#FFFFFF");}}},
+ /* Minnesota: a loon glides across the lake */
+ "Peggy Flanagan":(D,f)=>{D.arm("R","wave",f);const x=-4+f*4,y=29;D.R(x,y,6,2,"#1F1F26");D.R(x+4,y-2,2,2,"#1F1F26");D.P(x+6,y-1,"#3A3D46");D.P(x+5,y-2,"#C8202E");D.P(x+1,y,"#FFFFFF");D.P(x+3,y,"#FFFFFF");
+   D.R(x-2,y+2,4,1,"#BFE3FF");},
+ /* NFL sideline reporter: a spiral pass lands in her hands */
+ "Michele Tafoya":(D,f)=>{const pts=[[-4,4],[0,0],[5,-2],[10,-3],[15,-2],[19,1],[21,6],[21,11]];const [x,y]=pts[f];if(f>=6)D.arm("R","out");
+   D.R(x-1,y,4,2,"#8C4A22");D.P(x-2,y+1,"#6B3618");D.P(x+3,y,"#6B3618");D.P(x+1,y,"#FFFFFF");if(f<6&&f>0){D.P(x-3,y+2,"#E2E8F0");D.P(x-5,y+3,"#E2E8F0");}},
+ /* his canary lapel pin: a canary flies in and perches */
+ "Sherrod Brown":(D,f)=>{const pts=[[-3,0],[1,2],[5,3],[9,4],[13,6],[16,9],[17,13],[17,13]];const [x,y]=pts[f];const c="#FFD83A";
+   D.R(x,y,3,2,c);D.P(x+3,y,c);D.P(x+3,y-1,"#E8902A");D.P(x+2,y,"#1F1F26");D.P(x-1,y+1,"#E8B820");if(f<6){D.P(x+1,y-1-(f%2),"#E8B820");}else{D.P(x+4,y-3,"#2A3550");D.P(x+5,y-4,"#2A3550");D.P(x+5,y-3,"#2A3550");}},
+ /* former Ohio secretary of state: ballot into the box */
+ "Jon Husted":(D,f)=>{D.arm("R","out");D.R(20,22,8,7,"#F4F1EA");D.R(20,22,8,1,"#2152E0");D.R(22,23,4,1,"#1F1F26");D.R(21,26,6,1,"#DC2F3A");
+   const y=[13,14,16,18,20,21,13,13][f];if(f<6){D.R(22,y,4,3,"#FFFFFF");D.P(23,y+1,"#2A3550");D.P(24,y+1,"#2A3550");}},
+ /* former teacher: A+ on the chalkboard */
+ "James Talarico":(D,f)=>{D.R(19,2,10,8,"#7A4A21");D.R(20,3,8,6,"#2F5A3A");D.arm("R","up");
+   const marks=[[21,7],[21,6],[22,5],[22,4],[23,5],[23,6],[23,7],[22,6],[25,5],[26,5],[26,4],[27,5],[26,6]];const n=Math.min(marks.length,Math.round((f+1)*marks.length/7));
+   for(let i=0;i<n;i++)D.P(marks[i][0],marks[i][1],"#F4F1EA");},
+ /* Texas: lasso twirl */
+ "Ken Paxton":(D,f)=>{D.arm("R","up");const c="#C9A066";const a=f*Math.PI/4;for(let k=0;k<20;k++){const t=k/20*Math.PI*2;const x=Math.round(19+Math.cos(t+a)*6),y=Math.round(-1+Math.sin(t+a)*1.8);D.P(x,y,k%3?c:"#9C7A44");}
+   D.line(19,8,19,0,c);},
+ /* organizer: rally sign pumping */
+ "Angie Nixon":(D,f)=>{const u=(f%4<2)?0:1;
+   /* rally: sign pumps, free fist punches the air, she cheers, confetti falls, a shine sweeps the sign */
+   const conf=["#2152E0","#F2C14E","#FFFFFF","#DC2F3A","#2EA4C4"];
+   for(let k=0;k<11;k++){const x=-3+((k*7+3)%31),y=((f*3+k*9)%34)-4;D.P(x,y,conf[k%5]);if(k%3===0)D.P(x+1,y,conf[k%5]);}
+   if(u){D.arm("L","up");}else{D.arm("L","none");D.R(4,14,2,3,D.suitd);D.R(2,12,2,3,D.suitd);D.R(2,10,2,2,D.sk);}
+   D.arm("R","none");D.R(18,12-u,2,5+u,D.suitd);D.R(18,10-u,2,2,D.sk);D.R(19,9-u,1,1,"#8C6238");
+   const top=-2-u;D.R(12,top,15,11,"#FFFFFF");D.R(13,top+1,13,9,"#2152E0");D.R(13,top+9,13,1,"#173E9E");
+   PIX(D,15,top+1,["....#....","....#....","...###...","#########",".#######.","..#####..","..##.##..",".##...##.",".#.....#."],{"#":"#F7C21A"});
+   PIX(D,19,top+3,["o"],{o:"#FFE58A"});
+   const gx=13+((f*2)%13);for(let j=0;j<9;j++){const x=gx+Math.floor(j/3),y=top+1+8-j;if(x<=25)D.P(x,y,"rgba(255,255,255,.55)");}
+   if(u){D.R(10,11,4,1,"#7A2232");D.R(11,12,2,1,"#4A1020");[[3,7],[2,9],[3,11]].forEach(([x,y])=>D.P(x+(f%2),y,"#4A4F62"));}},
+ /* former judge: gavel */
+ "Ashley Moody":(D,f)=>{D.arm("R","out");D.R(21,25,6,2,"#7A4A21");D.R(22,24,4,1,"#9C6436");const down=f%4===2||f%4===3;
+   if(down){D.R(22,17,1,6,"#9C6436");D.R(21,22,4,2,"#5A3418");if(f%4===2){D.P(20,21,"#4A4F62");D.P(27,21,"#4A4F62");D.P(19,23,"#4A4F62");D.P(28,23,"#4A4F62");}}
+   else{D.line(22,17,26,12,"#9C6436");D.R(25,10,3,3,"#5A3418");}},
+ /* pediatrician: teddy bear waves */
+ "Annie Andrews":(D,f)=>{D.arm("R","out");const b="#B07A48",bd="#8C5A32";D.disc(24,13,2.2,b);D.P(22,10,b);D.P(26,10,b);D.R(23,16,3,4,b);D.P(23,13,"#1F1F26");D.P(25,13,"#1F1F26");D.P(24,14,bd);
+   const w=f%2;D.P(26,16-w,b);D.P(27,15-w*2,b);D.P(22,17,b);if(f%4===0){D.P(27,8,"#EE7FA8");D.P(28,8,"#EE7FA8");D.P(27,9,"#EE7FA8");}},
+ /* South Carolina flag on a pole */
+ "Darline Graham Nordone":(D,f)=>{D.arm("R","up");D.R(19,-2,1,12,"#8C93A3");const w=f%2;const fc="#1F3A7A";
+   for(let x=0;x<8;x++){const o=((x+f)%4<2)?0:1;D.R(20+x,-2+o,1,6,fc);}D.P(23,1+w,"#FFFFFF");D.P(23,2+w,"#FFFFFF");D.P(22,0+w,"#FFFFFF");D.P(24,0+w,"#FFFFFF");D.P(21,-1,"#FFFFFF");D.P(22,-1,"#FFFFFF");},
+ /* union mechanic: hard hat on, wrench turns */
+ "Dan Osborn":(D,f)=>{D.R(7,2,10,3,"#F2B705");D.R(6,4,12,1,"#D69A00");D.R(11,1,2,1,"#F2B705");D.arm("R","out");const t=f*Math.PI/4;const ex=Math.round(23+Math.cos(t)*3),ey=Math.round(16+Math.sin(t)*3);
+   D.line(23,16,ex,ey,"#9AA2B2");D.R(ex-1,ey-1,2,2,"#9AA2B2");},
+ /* baseball family: tosses a ball into his glove */
+ "Pete Ricketts":(D,f)=>{D.arm("R","out");D.R(21,15,4,3,"#8C4A22");D.R(22,14,3,1,"#A85C2C");const ys=[13,9,6,4,4,6,9,13];const y=ys[f];D.disc(23,y,1.2,"#FFFFFF");D.P(22,y,"#DC2F3A");D.P(24,y,"#DC2F3A");}
+};
+
+/* ---- refined props (round 2) ---- */
+const PIX=(D,x,y,rows,pal)=>rows.forEach((r,j)=>{for(let i=0;i<r.length;i++){const c=pal[r[i]];if(c)D.P(x+i,y+j,c);}});
+Object.assign(ACTS,{
+ /* gavel: barrel head with dark end caps, turned handle, sound block */
+ "Ashley Moody":(D,f)=>{D.arm("R","out");
+   PIX(D,21,21,["dddddd","bbbbbb"],{d:"#9C6436",b:"#5A3418"});
+   const hit=f%4===2||f%4===3;
+   if(!hit){ D.R(22,10,1,6,"#B07A44"); D.P(22,15,"#7A4A21");
+     PIX(D,19,6,["cmmmmmc","cMMMMMc","cmmmmmc"],{c:"#3A2010",m:"#8C5226",M:"#B87240"}); D.R(21,7,1,1,"#F2C14E"); D.R(23,7,1,1,"#F2C14E"); }
+   else { D.R(23,17,3,1,"#B07A44");
+     PIX(D,25,14,["ccc","mMm","mMm","mMm","mMm","ccc"],{c:"#3A2010",m:"#8C5226",M:"#B87240"});
+     if(f%4===2){[[22,19],[21,18],[27,18],[27,13],[24,12]].forEach(([x,y])=>D.P(x,y,"#4A4F62"));}}},
+ /* rally sign: blue board, white border, big white star */
+ "Angie Nixon":(D,f)=>{const u=(f%4<2)?0:1;
+   /* rally: sign pumps, free fist punches the air, she cheers, confetti falls, a shine sweeps the sign */
+   const conf=["#2152E0","#F2C14E","#FFFFFF","#DC2F3A","#2EA4C4"];
+   for(let k=0;k<11;k++){const x=-3+((k*7+3)%31),y=((f*3+k*9)%34)-4;D.P(x,y,conf[k%5]);if(k%3===0)D.P(x+1,y,conf[k%5]);}
+   if(u){D.arm("L","up");}else{D.arm("L","none");D.R(4,14,2,3,D.suitd);D.R(2,12,2,3,D.suitd);D.R(2,10,2,2,D.sk);}
+   D.arm("R","none");D.R(18,12-u,2,5+u,D.suitd);D.R(18,10-u,2,2,D.sk);D.R(19,9-u,1,1,"#8C6238");
+   const top=-2-u;D.R(12,top,15,11,"#FFFFFF");D.R(13,top+1,13,9,"#2152E0");D.R(13,top+9,13,1,"#173E9E");
+   PIX(D,15,top+1,["....#....","....#....","...###...","#########",".#######.","..#####..","..##.##..",".##...##.",".#.....#."],{"#":"#F7C21A"});
+   PIX(D,19,top+3,["o"],{o:"#FFE58A"});
+   const gx=13+((f*2)%13);for(let j=0;j<9;j++){const x=gx+Math.floor(j/3),y=top+1+8-j;if(x<=25)D.P(x,y,"rgba(255,255,255,.55)");}
+   if(u){D.R(10,11,4,1,"#7A2232");D.R(11,12,2,1,"#4A1020");[[3,7],[2,9],[3,11]].forEach(([x,y])=>D.P(x+(f%2),y,"#4A4F62"));}},
+ /* gear floats above his outstretched, palm-up hand */
+ "John E. Sununu":(D,f)=>{D.arm("R","out");D.P(22,15,D.sk);const cx=22,cy=9+(f%4<2?0:1),c="#8E95A3",d="#4E5464",h="#C9CED8";
+   const T=f%2?[[-3,-3],[3,-3],[-3,3],[3,3]]:[[0,-4],[0,4],[-4,0],[4,0]], T2=f%2?[[0,-4],[0,4],[-4,0],[4,0]]:[[-3,-3],[3,-3],[-3,3],[3,3]];
+   T.forEach(([x,y])=>D.R(cx+x-1,cy+y-1,3,3,c)); T2.forEach(([x,y])=>D.R(cx+Math.sign(x)*(Math.abs(x)-1)-0,cy+Math.sign(y)*(Math.abs(y)-1),1,1,c));
+   D.disc(cx,cy,3.2,c);D.disc(cx,cy,1.2,d);D.P(cx-2,cy-2,h);D.P(cx-1,cy-3,h);D.P(cx-3,cy-1,h);
+   if(f%4===0)D.P(cx+5,cy-4,"#FFE58A");},
+ /* loon in flight: black body, white back spots, red eye, dagger beak, flapping wings */
+ "Peggy Flanagan":(D,f)=>{D.arm("R","wave",f);const x=-6+f*4,y=-1+(f%2);const up=f%2===0;
+   PIX(D,x,y,[".kkkkkk.kk..","kwkwkwkkkrkgg",".kkkkkkkk...."],{k:"#16161C",w:"#E8ECF2",r:"#D6202E",g:"#7A808C"});
+   if(up)PIX(D,x+2,y-2,[".kkk","kk.."],{k:"#16161C"});else PIX(D,x+2,y+3,["kk..",".kk.","..kk"],{k:"#2A2A33"});},
+ /* football: pointed brown ball with white laces, spiraling in */
+ "Michele Tafoya":(D,f)=>{const pts=[[-6,3],[-1,0],[4,-2],[9,-3],[14,-2],[18,1],[20,6],[20,12]];const [x,y]=pts[f];if(f>=6)D.arm("R","out");
+   PIX(D,x-1,y,["..bbbbbb..",".bBwBwBwb.","bBBwwwwwBb",".bdwdwdwb.","..bbbbbb.."],{b:"#6B3618",B:"#8C4A22",d:"#7A3E1C",w:"#FFFFFF"});
+   if(f>0&&f<6){D.P(x-2,y+3,"#E2E8F0");D.P(x-4,y+4,"#E2E8F0");}},
+ /* megaphone held to his mouth, sound waves pulse out */
+ "Abdul El-Sayed":(D,f)=>{D.arm("R","none");D.R(18,15,2,2,D.suitd);D.R(17,14,2,1,D.suitd);
+   PIX(D,14,6,["......rr","....wwrr","..wwwwrr","wwwWWWrr","wwwWWWrr","..wwwwrr","....wwrr","......rr"],{w:"#ECECF0",W:"#C9CCD6",r:"#DC2F3A"});
+   D.R(16,12,2,1,D.sk);D.R(17,13,1,2,"#1F1F26");
+   const r=f%4;for(let k=0;k<=r;k++){const x=23+k*2;D.P(x,10,"#4A4F62");D.P(x,9-k,"#4A4F62");D.P(x,11+k,"#4A4F62");if(k)D.P(x-1,9-k+1,"#4A4F62"),D.P(x-1,11+k-1,"#4A4F62");}},
+ /* canary flies in and perches on his shoulder */
+ "Sherrod Brown":(D,f)=>{const pts=[[-3,-1],[1,0],[5,1],[9,2],[12,4],[15,7],[16,10],[16,10]];const [x,y]=pts[f];
+   const pal={y:"#FFD83A",Y:"#F2B705",o:"#F08A1C",k:"#1F1F26",w:"#FFF4B0"};
+   if(f<6){ PIX(D,x,y,["..yy.","..yko","yyyy.",".yy.."],pal); if(f%2)PIX(D,x,y-2,[".YY..","YY..."],pal); else PIX(D,x,y+3,["YY...",".YY.."],pal); }
+   else { PIX(D,x,y,["..yy.","..yko",".yyyy","YYwyy","Y.yy.","..o.o"],pal); if(f===7){D.P(x+5,y-3,"#2A3550");D.P(x+5,y-2,"#2A3550");D.P(x+6,y-4,"#2A3550");D.P(x+4,y-1,"#2A3550");}}},
+ /* bigger log with end-grain rings */
+ "Troy Jackson":(D,f)=>{const L="#8C5A32",Ld="#6B4022",E="#E0B07A",Er="#B07A44";
+   D.R(16,26,12,5,L);D.R(16,30,12,1,Ld);D.R(17,26,11,1,"#A86C3C");for(let x=18;x<27;x+=3)D.P(x,28,Ld);
+   PIX(D,14,25,[".EEE.","EErEE","ErErE","EErEE",".EEE."],{E,r:Er});
+   if(f<4){D.arm("R","up");D.R(19,1,1,9,"#7A4A21");PIX(D,18,-1,[".....ee","pddbbbe","pddbbbe","pddbbbe",".....ee"],{e:"#E8ECF2",b:"#A3AAB8",d:"#5E6575",p:"#7C8494"});}
+   else{D.arm("R","out");D.R(23,17,1,5,"#7A4A21");PIX(D,21,21,[".ppp.",".ddd.","bbbbb","ebbbe","eeeee"],{e:"#E8ECF2",b:"#A3AAB8",d:"#5E6575",p:"#7C8494"});
+     if(f<6){[[18,23],[25,22],[17,21],[26,24]].forEach(([x,y],k)=>D.P(x,y-(f-4),k%2?"#E0B07A":"#C9955E"));}}},
+ /* open-end wrench turning a bolt */
+ "Dan Osborn":(D,f)=>{D.R(7,2,10,3,"#F2B705");D.R(6,4,12,1,"#D69A00");D.R(11,1,2,1,"#F2B705");
+   PIX(D,18,22,["pppppppppp","PPPPPPPPPP",".l......l.",".l......l."],{p:"#C9955E",P:"#9C6C3E",l:"#7A5230"});
+   const sink=Math.min(2,Math.floor(f/3));D.R(24,19+sink,1,3-sink,"#8E95A3");D.R(23,19+sink,3,1,"#B8BEC8");
+   const hit=f%4===2||f%4===3;D.arm("R","none");
+   if(!hit){D.R(18,14,2,3,D.suitd);D.R(20,12,2,2,D.suitd);D.R(21,11,2,1,D.sk);D.line(22,10,24,5,"#A8743E");D.line(23,10,25,5,"#C98F52");
+     PIX(D,22,2,["ssss","SSSSs","s..."],{s:"#7E8696",S:"#B8BEC8"});}
+   else{D.R(18,16,2,2,D.suitd);D.R(20,16,2,2,D.sk);D.R(22,16,1,1,"#A8743E");D.line(22,17,24,15,"#A8743E");
+     PIX(D,23,15,["ss","SS","SS","ss"],{s:"#7E8696",S:"#B8BEC8"});
+     if(f%4===2){[[21,17],[27,16],[22,19],[26,19]].forEach(([x,y])=>D.P(x,y,"#FFE58A"));}}},
+ /* catcher's mitt and a baseball toss */
+ "Pete Ricketts":(D,f)=>{D.arm("R","out");
+   PIX(D,20,12,[".b.b.b.","bbbbbbb","bppppbB","bppppbB","bbbbbB.",".bbbb.."],{b:"#7A3E1A",B:"#5A2A10",p:"#C8844A"});
+   const ys=[7,3,0,-2,-2,0,3,7];const y=ys[f];
+   PIX(D,21,y,[".wwww.","wrwwrw","rwwwwr","rwwwwr","wrwwrg",".wggg."],{w:"#FFFFFF",g:"#D3D7DF",r:"#D62834"});},
+ /* salmon: dark back, pink-silver body, forked tail */
+ "Mary Peltola":(D,f)=>{D.arm("R","up");const pts=[[16,29],[18,23],[20,19],[22,17],[23,19],[24,23],[25,28],[25,33]];const [x,y]=pts[f];
+   PIX(D,x-4,y-1,["t..bbbbb..","tTpppppppk","t..sssss.."],{t:"#4E6070",T:"#6E8090",b:"#5E7280",p:"#F08A80",s:"#D9E2EA",k:"#1F1F26"});
+   if(f===0||f===6){[[14,28],[16,27],[18,28],[20,27],[22,28]].forEach(([a,b])=>D.P(a+(f?8:0),b,"#BFE3FF"));}},
+ /* salute: elbow out to the side, hand flat at the brow */
+ "Dan Sullivan":(D,f)=>{if(f<1||f>6)return;D.arm("R","none");const c=D.suitd;
+   D.R(18,14,3,3,c);D.R(20,12,3,3,c);D.line(20,11,17,7,c);D.line(21,11,18,7,c);D.line(22,11,19,7,c);D.line(21,12,18,8,c);
+   D.R(12,5,7,1,D.sk);D.R(12,6,7,1,D.skd);},
+ /* pediatrician: lab coat, stethoscope, and a heartbeat line */
+ "Annie Andrews":(D,f)=>{const W="#F6F7F9",Wd="#D5D9E0";
+   D.R(6,16,12,9,W);D.R(7,15,10,1,W);D.R(15,16,3,9,Wd);D.R(6,25,12,2,W);D.R(15,25,3,2,Wd);
+   [[15,9,6],[16,9,6],[17,10,4],[18,10,4],[19,11,2],[20,11,2]].forEach(([y,x,w])=>D.R(x,y,w,1,"#EE7FA8"));
+   D.R(9,16,1,6,Wd);D.R(14,16,1,6,Wd);D.R(15,20,2,1,"#2152E0");
+   D.arm("L","none");D.R(4,16,2,8,Wd);D.R(4,24,2,1,D.sk);
+   D.arm("R","none");D.R(18,16,2,2,Wd);D.R(20,16,2,2,Wd);D.R(22,16,1,2,D.sk);
+   const s="#6E7686";D.P(10,15,s);D.P(13,15,s);D.P(9,16,s);D.P(14,16,s);D.line(14,17,20,15,s);D.R(22,14,2,2,"#9AA2B2");D.P(22,14,"#C9CED8");
+   D.R(18,4,10,9,"#1F1F26");D.R(19,5,8,7,"#0E2A1A");const tr=[0,0,0,-3,2,-1,0,0];
+   for(let i=0;i<8;i++){const k=(i+f)%8;D.P(19+i,8+tr[k],"#3FE07A");if(tr[k]){const s=Math.sign(tr[k]);for(let j=1;j<Math.abs(tr[k]);j++)D.P(19+i,8+s*j,"#3FE07A");}}
+   D.R(21,13,1,1,"#1F1F26");},
+ /* lasso: rope swings out in a curve to a spinning loop beside him */
+ "Ken Paxton":(D,f)=>{D.arm("R","none");D.R(18,14,2,3,D.suitd);D.R(20,12,2,2,D.suitd);D.R(21,10,2,2,D.sk);
+   const c="#D6B07A",cd="#9C7A44";const a=f*Math.PI/4;
+   const cx=23,cy=3;for(let k=0;k<26;k++){const t=k/26*Math.PI*2;const x=Math.round(cx+Math.cos(t)*4.6),y=Math.round(cy+Math.sin(t)*2.2+Math.cos(t)*1.2);D.P(x,y,((k+f*3)%26)<4?"#F4E1B8":(k%2?c:cd));}
+   const ex=Math.round(cx+Math.cos(a+Math.PI*.75)*4.6),ey=Math.round(cy+Math.sin(a+Math.PI*.75)*2.2+Math.cos(a+Math.PI*.75)*1.2);
+   const mx=Math.round((22+ex)/2+2),my=Math.round((10+ey)/2+1);D.line(22,10,mx,my,c);D.line(mx,my,ex,ey,c);},
+ /* bigger mic held in front of her chin, clear of her hair */
+ "Ashley Hinson":(D,f)=>{D.arm("R","none");D.R(18,16,2,2,D.suitd);D.R(16,17,2,2,D.suitd);D.R(14,17,2,1,D.sk);
+   PIX(D,13,11,[".mm.","mhmm","mmmm",".mm."],{m:"#3E434E",h:"#A6ACB8"});D.R(14,15,2,2,"#1F1F26");
+   const on=f%4<2;D.R(18,-3,10,5,"#1F1F26");D.R(19,-2,8,3,on?"#E53946":"#6A2228");}
+});
+
+/* ---------------- PIXEL PORTRAITS ---------------- */
+const PW=32, PH=36, PSC=5, OX=4, OY=4;
+const SKIN={
+  fair:["#F4CDB0","#DDAA8A"], ruddy:["#F0BFA0","#D69C7E"], light:["#EFC6A4","#D4A482"],
+  tan:["#DDA67E","#BD855E"], medium:["#C98D62","#A86F48"], brown:["#9C6644","#7C4E32"], deep:["#6E4430","#563322"]};
+const HAIR={black:"#1E1A1C",dkbrown:"#3A2A22",brown:"#5C3E2C",ltbrown:"#8C6644",auburn:"#7C4030",red:"#9A5A36",
+  blonde:"#E2BE6E",platinum:"#F0DFA8",salt:"#77736F",gray:"#A3A2A6",silver:"#C8C8CE",white:"#E6E6EA"};
+const CLOTH={navy:"#22305A",charcoal:"#34363F",black:"#1F2027",gray:"#6E717B",blue:"#2B4C8C",plum:"#5A2E5C",tan:"#8C7458",
+  red:"#C5303A",white:"#F4F2EE",ltblue:"#BFD3EE",lilac:"#C9B6DE",pink:"#EE7FA8",coral:"#E8665A",teal:"#2F8E8A",cream:"#F1E6CF"};
+const TIE={D:"#2152E0",R:"#DC2F3A",I:"#E6A800"};
+/* hair: short | side | receding | balding | bald | shaved | thick | tousled | bob | long | wavy | shoulder | locs
+   face: beard | stubble | horseshoe ; glasses: thin | thick ; top: tie | open | bolo | plaid | blouse | closed
+   extras: earrings | pearls | necklace | gold */
+const LOOKS={
+ "Ben Ray Luján":{skin:"tan",hair:"side",hc:"black",gray:true,suit:"navy",shirt:"white",top:"tie"},
+ "Larry Marker":{skin:"ruddy",hair:"shaved",hc:"silver",face:"horseshoe",fc:"silver",suit:"charcoal",shirt:"white",top:"bolo"},
+ "Roy Cooper":{skin:"fair",hair:"thick",hc:"white",suit:"navy",shirt:"white",top:"tie",older:true},
+ "Michael Whatley":{skin:"fair",hair:"balding",hc:"white",suit:"navy",shirt:"white",top:"tie",older:true},
+ "Jon Ossoff":{skin:"fair",hair:"side",hc:"dkbrown",suit:"navy",shirt:"white",top:"tie"},
+ "Mike Collins":{skin:"ruddy",hair:"short",hc:"silver",suit:"gray",shirt:"white",top:"tie"},
+ "Chris Pappas":{skin:"fair",hair:"short",hc:"dkbrown",suit:"navy",shirt:"ltblue",top:"tie"},
+ "John E. Sununu":{skin:"fair",hair:"receding",hc:"brown",glasses:"thin",suit:"charcoal",shirt:"ltblue",top:"tie"},
+ "Mary Peltola":{skin:"tan",hair:"long",hc:"black",suit:"navy",shirt:"black",top:"blouse",fem:true,extras:["earrings"]},
+ "Dan Sullivan":{skin:"fair",hair:"short",hc:"ltbrown",suit:"navy",shirt:"white",top:"tie"},
+ "Josh Turek":{skin:"fair",hair:"side",hc:"dkbrown",face:"beard",fc:"dkbrown",suit:"navy",shirt:"white",top:"tie",chair:true},
+ "Ashley Hinson":{skin:"fair",hair:"shoulder",hc:"platinum",suit:"red",shirt:"white",top:"blouse",fem:true,extras:["pearls"]},
+ "Adam Hamilton":{skin:"fair",hair:"receding",hc:"ltbrown",glasses:"thick",suit:"charcoal",shirt:"lilac",top:"open"},
+ "Roger Marshall":{skin:"ruddy",hair:"side",hc:"silver",suit:"black",shirt:"white",top:"tie"},
+ "Troy Jackson":{skin:"fair",hair:"receding",hc:"dkbrown",suit:"charcoal",shirt:"lilac",top:"tie",wide:true},
+ "Susan Collins":{skin:"fair",hair:"bob",hc:"auburn",suit:"red",shirt:"red",top:"closed",fem:true},
+ "Abdul El-Sayed":{skin:"medium",hair:"short",hc:"black",face:"beard",fc:"black",suit:"charcoal",shirt:"white",top:"tie"},
+ "Mike Rogers":{skin:"ruddy",hair:"thick",hc:"gray",suit:"navy",shirt:"white",top:"tie",older:true},
+ "Peggy Flanagan":{skin:"light",hair:"shoulder",hc:"black",glasses:"thick",suit:"plum",shirt:"teal",top:"blouse",fem:true,extras:["necklace"]},
+ "Michele Tafoya":{skin:"light",hair:"wavy",hc:"dkbrown",suit:"navy",shirt:"coral",top:"blouse",fem:true},
+ "Sherrod Brown":{skin:"fair",hair:"tousled",hc:"gray",suit:"navy",shirt:"white",top:"tie",older:true},
+ "Jon Husted":{skin:"fair",hair:"side",hc:"silver",suit:"navy",shirt:"white",top:"tie"},
+ "James Talarico":{skin:"fair",hair:"side",hc:"dkbrown",suit:"charcoal",shirt:"white",top:"tie"},
+ "Ken Paxton":{skin:"ruddy",hair:"side",hc:"white",suit:"navy",shirt:"white",top:"tie",older:true},
+ "Angie Nixon":{skin:"deep",hair:"locs",hc:"black",suit:"black",shirt:"white",top:"blouse",fem:true,extras:["necklace"]},
+ "Ashley Moody":{skin:"fair",hair:"long",hc:"brown",suit:"navy",shirt:"white",top:"blouse",fem:true,extras:["gold"]},
+ "Annie Andrews":{skin:"fair",hair:"wavy",hc:"blonde",suit:"gray",shirt:"pink",top:"blouse",fem:true},
+ "Darline Graham Nordone":{skin:"fair",hair:"shoulder",hc:"ltbrown",suit:"black",shirt:"teal",top:"blouse",fem:true},
+ "Dan Osborn":{skin:"tan",hair:"short",hc:"salt",face:"stubble",fc:"salt",suit:"tan",shirt:"plaid",top:"plaid"},
+ "Pete Ricketts":{skin:"fair",hair:"bald",hc:"gray",suit:"navy",shirt:"white",top:"tie"},
+ "Alani Bankhead":{skin:"light",hair:"wavy",hc:"dkbrown",suit:"black",shirt:"white",top:"blouse",fem:true},
+ "Seth Bodnar":{skin:"fair",hair:"side",hc:"brown",face:"beard",fc:"brown",suit:"charcoal",shirt:"plaid",top:"plaid"},
+ "Kurt Alme":{skin:"fair",hair:"side",hc:"red",suit:"black",shirt:"white",top:"tie"},
+ /* generic figures for the start screen */
+ "Blue Knight":{skin:"light",hair:"side",hc:"brown",suit:"navy",shirt:"white",top:"tie",party:"D",anon:true},
+ "Gold Knight":{skin:"tan",hair:"shoulder",hc:"black",suit:"charcoal",shirt:"cream",top:"blouse",fem:true,party:"I",anon:true},
+ "Red Knight":{skin:"fair",hair:"short",hc:"gray",suit:"navy",shirt:"white",top:"tie",party:"R",anon:true}
+};
+function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
+  if(f<0){r*=1+f;g*=1+f;b*=1+f;}else{r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f;}
+  return "#"+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,"0")).join("");}
+function mixHex(a,b,t){const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16);
+  const c=[16,8,0].map(s=>Math.round(((A>>s)&255)*(1-t)+((B>>s)&255)*t));return "#"+c.map(v=>v.toString(16).padStart(2,"0")).join("");}
+function drawPerson(cv, name, party, opts={}){
+  const L=Object.assign({skin:"light",hair:"short",hc:"brown",suit:"navy",shirt:"white",top:"tie"},LOOKS[name]||{});
+  party=L.party||party;
+  cv.width=PW*PSC; cv.height=PH*PSC;
+  const ctx=cv.getContext("2d"); ctx.imageSmoothingEnabled=false; ctx.clearRect(0,0,cv.width,cv.height);
+  const G=Array.from({length:PH},()=>Array(PW).fill(null));
+  const dy=opts.dy||0;
+  const P=(x,y,c)=>{x+=OX; y+=OY+dy; if(x>=0&&x<PW&&y>=0&&y<PH&&c) G[y][x]=c;};
+  const C=(x,y)=>{x+=OX; y+=OY+dy; if(x>=0&&x<PW&&y>=0&&y<PH) G[y][x]=null;};
+  const FX=[]; /* fine detail drawn after the outline pass, so it stays one pixel thin */
+  const Pn=(x,y,c)=>{x+=OX; y+=OY+dy; if(x>=0&&x<PW&&y>=0&&y<PH&&c) FX.push([x,y,c]);};
+  const Rr=(x,y,w,h,c)=>{for(let j=0;j<h;j++)for(let i=0;i<w;i++)P(x+i,y+j,c);};
+  const [sk,skd]=SKIN[L.skin]; const hc=HAIR[L.hc], hcd=shade(hc,-.28), hcl=shade(hc,.22);
+  const suit=CLOTH[L.suit], suitd=shade(suit,-.3), suitl=shade(suit,.18);
+  const shirt=CLOTH[L.shirt]||CLOTH.white, tie=TIE[party]||TIE.I;
+  const ink="#1C1B26";
+  /* ---- lower body ---- */
+  if(L.chair){
+    const rim="#3D424E", tire="#23262E", spoke="#9AA2B2";
+    for(let a=0;a<90;a++){const th=a/90*Math.PI*2; P(Math.round(9+Math.cos(th)*6),Math.round(25+Math.sin(th)*6),tire); P(Math.round(9+Math.cos(th)*5),Math.round(25+Math.sin(th)*5),rim);}
+    for(let k=0;k<6;k++){const th=k*Math.PI/3; for(let s=1;s<5;s++)P(Math.round(9+Math.cos(th)*s),Math.round(25+Math.sin(th)*s),spoke);}
+    P(9,25,"#C9CED8");
+    Rr(4,14,1,8,rim); P(4,13,tire);
+    Rr(6,22,12,2,"#2E3038");
+    Rr(9,21,8,2,suitd); Rr(15,23,3,5,shade(suit,-.38)); Rr(15,28,4,1,"#1F1B1E"); Rr(14,29,6,1,rim); P(14,28,rim);
+    P(18,30,tire); P(17,31,tire);
+  } else {
+    Rr(8,25,4,4,suitd); Rr(12,25,4,4,shade(suit,-.38)); C(11,27); C(12,27);
+    C(11,28); C(12,28);
+    Rr(7,29,5,2,"#1F1B1E"); Rr(12,29,5,2,"#1F1B1E"); P(8,29,"#3A3540"); P(13,29,"#3A3540");
+  }
+  /* ---- torso & arms ---- */
+  const tw=L.wide?1:0;
+  Rr(7-tw,15,10+2*tw,1,suit); Rr(6-tw,16,12+2*tw,(L.chair?7:9),suit);
+  Rr(15+tw,16,2,(L.chair?7:9),suitd);
+  const armB=L.chair?21:23;
+  Rr(4-tw,16,2,armB-15,suitd); Rr(18+tw,16,2,armB-15,suitd); P(5-tw,16,suit); P(18+tw,16,suit);
+  Rr(4-tw,armB+1,2,1,skd); Rr(18+tw,armB+1,2,1,skd); P(4-tw,armB+1,sk);
+  /* shirt / collar */
+  const V=[[15,9,6],[16,10,4],[17,10,4],[18,11,2],[19,11,2],[20,11,2]];
+  if(L.top==="closed"){
+    Rr(9,15,6,1,shade(suit,.25)); P(9,16,shade(suit,.25)); P(14,16,shade(suit,.25));
+    for(let y=17;y<24;y+=3)P(12,y,"#F2D27A");
+  } else if(L.top==="blouse"){
+    [[15,9,6],[16,9,6],[17,10,4],[18,10,4],[19,11,2],[20,11,2]].forEach(([y,x,w])=>Rr(x,y,w,1,shirt));
+    if(L.shirt==="black") Rr(9,15,6,1,"#2A2A30");
+    Rr(9,16,1,5,suitl); Rr(14,16,1,5,suitl);
+    P(8,17,tie);
+  } else if(L.top==="plaid"){
+    V.forEach(([y,x,w])=>{for(let i=0;i<w;i++)P(x+i,y,((x+i+y)%2)?"#B5453A":"#E8DCC8");});
+    P(9,15,"#E8DCC8");P(14,15,"#E8DCC8");P(11,15,sk);P(12,15,skd);
+    Rr(9,16,1,5,suitl); Rr(14,16,1,5,suitl);
+  } else {
+    V.forEach(([y,x,w])=>Rr(x,y,w,1,shirt));
+    Rr(9,16,1,5,suitl); Rr(14,16,1,5,suitl);
+    P(8,17,tie);
+    if(L.top==="tie"){Rr(11,15,2,1,shade(tie,-.25)); Rr(11,16,2,5,tie); P(11,21,tie); P(12,21,shade(tie,-.25)); P(12,17,shade(tie,.25)); P(11,19,shade(tie,.25));}
+    else if(L.top==="open"){P(11,15,sk);P(12,15,skd);P(11,16,skd);}
+    else if(L.top==="bolo"){for(let y=15;y<21;y++){P(11,y,ink);P(12,y,ink);} Rr(10,17,4,2,"#B8BCC4"); Rr(11,17,2,2,"#2EC4B6"); P(11,21,"#B8BCC4"); P(12,21,"#B8BCC4");}
+    P(12,22,shade(suit,-.45)); P(12,24,shade(suit,-.45));
+  }
+  if(L.extras&&L.extras.includes("gold")){P(10,21,"#F2C14E");P(13,21,"#F2C14E");P(10,23,"#F2C14E");P(13,23,"#F2C14E");}
+  if(L.extras&&L.extras.includes("pearls")){[9,11,13].forEach(x=>P(x,15,"#FFFFFF"));[10,12,14].forEach(x=>P(x,16,"#F4F1EA"));}
+  if(L.extras&&L.extras.includes("necklace")){P(10,16,"#E8A93A");P(11,17,"#D6453A");P(12,17,"#2EA4C4");P(13,16,"#E8A93A");}
+  /* ---- neck & head ---- */
+  Rr(10,14,4,1,skd);
+  const face=[[4,9,6],[5,8,8],[6,7,10],[7,7,10],[8,7,10],[9,7,10],[10,7,10],[11,7,10],[12,8,8],[13,9,6]];
+  face.forEach(([y,x,w])=>Rr(x,y,w,1,sk));
+  Rr(16,7,1,5,skd); Rr(9,13,6,1,skd); P(15,12,skd);
+  P(6,9,sk);P(6,10,skd);P(17,9,skd);P(17,10,skd);
+  if(L.older){P(9,10,skd);P(14,10,skd);}
+  /* ---- hair ---- */
+  const H=hc;
+  const top=()=>{Rr(9,2,6,1,H);Rr(8,3,8,1,H);Rr(7,4,10,2,H);};
+  switch(L.hair){
+    case "short": top(); P(7,6,H);P(16,6,H);P(7,7,H);P(16,7,H); Rr(9,3,4,1,hcl); break;
+    case "side": top(); Rr(8,6,4,1,H); P(7,6,H);P(16,6,H);P(7,7,H);P(16,7,H); Rr(12,3,3,1,hcl); P(11,4,hcd); P(12,2,hcd);
+      if(L.gray){P(7,7,"#A3A2A6");P(16,7,"#A3A2A6");P(16,6,"#A3A2A6");} break;
+    case "receding": Rr(9,3,6,1,H); Rr(7,4,3,2,H); Rr(14,4,3,2,H); Rr(10,4,4,1,H); Rr(11,3,2,1,hcl); P(7,6,H);P(16,6,H);P(7,7,H);P(16,7,H); break;
+    case "balding": Rr(9,3,6,1,sk); Rr(8,4,8,1,sk); P(10,3,shade(sk,.25)); P(7,5,H);P(7,6,H);P(7,7,H);P(16,5,H);P(16,6,H);P(16,7,H);P(8,5,H);P(15,5,H); Rr(10,4,4,1,shade(H,-.05)); break;
+    case "bald": Rr(9,3,6,1,sk); Rr(8,4,8,2,sk); P(10,4,shade(sk,.3)); P(11,4,shade(sk,.3)); P(7,7,H);P(16,7,H);P(7,8,H);P(16,8,H); break;
+    case "shaved": Rr(9,3,6,1,sk); Rr(8,4,8,2,sk); P(10,4,shade(sk,.3)); P(11,4,shade(sk,.3)); break;
+    case "thick": Rr(9,1,6,1,H); Rr(8,2,9,1,H); Rr(7,3,10,3,H); Rr(6,4,1,4,H); Rr(17,4,1,4,H); P(7,6,H);P(16,6,H); P(15,1,H);
+      Rr(9,2,5,1,hcl); Rr(8,6,3,1,H); P(13,2,hcd); break;
+    case "tousled": Rr(9,1,2,1,H); Rr(12,1,3,1,H); Rr(8,2,9,1,H); Rr(7,3,10,3,H); P(6,4,H);P(17,4,H);P(6,5,H);P(17,5,H); P(16,1,H);
+      P(8,6,H);P(10,6,H);P(13,6,H);P(15,6,H); P(7,6,H);P(16,6,H); Rr(10,2,3,1,hcl); P(12,4,hcd); P(9,4,hcd); break;
+    case "bob": Rr(9,2,6,1,H); Rr(8,3,8,1,H); Rr(7,4,10,1,H); Rr(6,5,12,1,H); Rr(8,6,3,1,H); P(11,6,H);
+      Rr(6,6,2,7,H); Rr(16,6,2,7,H); P(5,12,H); P(18,12,H); Rr(6,13,2,1,hcd); Rr(16,13,2,1,hcd); Rr(9,3,4,1,hcl); break;
+    case "long": case "wavy": case "shoulder": case "locs": {
+      const end=L.hair==="shoulder"?14:L.hair==="locs"?16:18;
+      Rr(9,2,6,1,H); Rr(8,3,8,1,H); Rr(7,4,10,2,H); Rr(7,6,2,1,H); Rr(15,6,2,1,H); P(9,6,H);
+      for(let y=5;y<=end;y++){const w=L.hair==="wavy"?((y%3===0)?1:0):0; const sp=(y>=14)?1:0;
+        Rr(6-w-sp,y,2+sp,1,H); Rr(16,y,2+w+sp,1,H);}
+      Rr(5,end,3,1,hcd); Rr(16,end,3,1,hcd);
+      if(L.hair==="locs"){for(let y=4;y<=end;y++){if(y%2){P(6,y,hcd);P(17,y,hcd);P(5,y,hcl);}} for(let x=8;x<16;x+=2)P(x,4,hcd); P(18,15,H);P(5,15,H);P(18,16,hcd);}
+      Rr(10,3,3,1,hcl); P(12,4,hcd);
+      break;}
+  }
+  /* ---- face details ---- */
+  const brow=(L.hc==="platinum"||L.hc==="blonde"||L.hc==="white"||L.hc==="silver")?shade(hc,-.45):hcd;
+  if(!L.anon){ const by=L.glasses?6:7; Rr(9,by,2,1,brow); Rr(13,by,2,1,brow); }
+  if(opts.blink){ Rr(9,9,2,1,"#2A1E1E"); Rr(13,9,2,1,"#2A1E1E"); }
+  else { P(10,8,"#FFFFFF"); P(10,9,"#2A1E1E"); P(9,9,"#FFFFFF"); P(13,8,"#FFFFFF"); P(13,9,"#2A1E1E"); P(14,9,"#FFFFFF"); P(9,8,"#2A1E1E"); P(14,8,"#2A1E1E"); }
+  P(12,10,skd);
+  if(L.fem){ P(8,10,mixHex(sk,"#E8707A",.35)); P(15,10,mixHex(sk,"#E8707A",.35)); }
+  const mouthC=L.fem?"#B8424E":"#7A2E2A";
+  P(10,11,mouthC); P(11,11,"#FFFFFF"); P(12,11,"#FFFFFF"); P(13,11,mouthC); P(11,12,mouthC); P(12,12,mouthC);
+  /* facial hair */
+  if(L.face){ const F=HAIR[L.fc||L.hc];
+    if(L.face==="beard"){ [[10,7,2],[10,15,2],[11,7,3],[11,14,3],[12,8,3],[12,13,3],[13,9,6]].forEach(([y,x,w])=>Rr(x,y,w,1,F)); Rr(10,10,4,1,F); P(11,12,F);P(12,12,F); P(11,13,shade(F,.15)); }
+    else if(L.face==="stubble"){ const S=mixHex(sk,F,.45); [[10,7,2],[10,15,2],[11,7,3],[11,14,3],[12,8,3],[12,13,3],[13,9,6]].forEach(([y,x,w])=>{for(let i=0;i<w;i++)if((x+i+y)%2===0)P(x+i,y,S);}); Rr(10,10,4,1,S); }
+    else if(L.face==="horseshoe"){ Rr(9,10,6,1,F); P(9,11,F);P(9,12,F);P(14,11,F);P(14,12,F); Rr(10,13,4,1,F); }
+  }
+  if(L.glasses){ const g=L.glasses==="thick"?"#1A1820":"#5E5866";
+    /* small round lenses: top and bottom arcs, outer rim, one-pixel bridge; corners left open so they read round */
+    [[9,10,8],[13,14,15]].forEach(([a,b,o])=>{ P(a,7,g);P(b,7,g);P(a,10,g);P(b,10,g);P(o,8,g);P(o,9,g); });
+    P(11,8,g); P(12,8,g);
+    P(7,8,g); P(16,8,g);
+    [[9,10],[13,14]].forEach(([a,b])=>{for(let x=a;x<=b;x++)for(let y=8;y<=9;y++)P(x,y,sk);});
+    if(opts.blink){Rr(9,9,2,1,"#2A1E1E");Rr(13,9,2,1,"#2A1E1E");}
+    else{P(10,9,"#2A1E1E");P(13,9,"#2A1E1E");P(10,8,shade(sk,-.12));P(13,8,shade(sk,-.12));}
+    P(9,8,mixHex(sk,"#FFFFFF",.55)); P(14,8,mixHex(sk,"#FFFFFF",.55));
+  }
+  if(L.extras&&L.extras.includes("earrings")){P(6,11,"#F2C14E");P(6,12,"#E8902A");P(17,11,"#F2C14E");P(17,12,"#E8902A");}
+  /* ---- pick animation ---- */
+  if(opts.f!=null && ACTS[name]){
+    const D={sk,skd,suitd,P,Pn,R:Rr,t:opts.t||0,
+      line:(x0,y0,x1,y1,c)=>{let dx=Math.abs(x1-x0),sx=x0<x1?1:-1,dy2=-Math.abs(y1-y0),sy=y0<y1?1:-1,e=dx+dy2,n=0;for(;;){P(x0,y0,c);if((x0===x1&&y0===y1)||n++>80)break;const e2=2*e;if(e2>=dy2){e+=dy2;x0+=sx;}if(e2<=dx){e+=dx;y0+=sy;}}},
+      disc:(cx,cy,r,c)=>{for(let yy=Math.floor(cy-r);yy<=Math.ceil(cy+r);yy++)for(let xx=Math.floor(cx-r);xx<=Math.ceil(cx+r);xx++)if((xx-cx)**2+(yy-cy)**2<=r*r+.3)P(xx,yy,c);},
+      arm:(side,pose,fr)=>{
+        const cols=side==="R"?[18+tw,19+tw]:[4-tw,5-tw];
+        for(let y=16;y<=armB+1;y++)cols.forEach(x=>C(x,y));
+        const m=(x,w)=>side==="R"?x:23-x-w+1;
+        const R2=(x,y,w,h,c)=>Rr(m(x,w),y,w,h,c), P2=(x,y,c)=>P(m(x,1),y,c);
+        if(pose==="up"||pose==="wave"){R2(18,10,2,7,suitd);const o=(pose==="wave"&&fr%2)?1:0;R2(18+o,8,2,2,sk);}
+        else if(pose==="out"||pose==="thumb"){R2(18,16,2,2,suitd);R2(20,16,2,2,suitd);R2(22,16,1,2,sk);if(pose==="thumb")P2(22,15,sk);}
+        else if(pose==="salute"){R2(18,12,2,5,suitd);R2(17,8,2,4,suitd);R2(12,5,6,1,sk);R2(12,6,6,1,skd);P2(17,7,suitd);}
+        else if(pose==="mic"){R2(18,14,2,3,suitd);R2(16,15,2,2,suitd);R2(15,14,2,1,sk);}
+        else if(pose==="hold"){R2(18,16,2,3,suitd);R2(16,19,3,2,suitd);R2(15,20,1,1,sk);}
+        /* pose "none": arm cleared, the animation draws its own */
+      }};
+    ACTS[name](D,opts.f);
+  }
+  /* ---- outline + shadow ---- */
+  const O=G.map(r=>r.slice());
+  for(let y=0;y<PH;y++)for(let x=0;x<PW;x++){ if(G[y][x]) continue;
+    if((y>0&&G[y-1][x])||(y<PH-1&&G[y+1][x])||(x>0&&G[y][x-1])||(x<PW-1&&G[y][x+1])) O[y][x]=ink; }
+  ctx.fillStyle="rgba(18,20,28,.16)"; ctx.fillRect((6+OX)*PSC,(31+OY)*PSC,12*PSC,PSC); ctx.fillRect((8+OX)*PSC,(30.6+OY)*PSC,8*PSC,PSC*.6);
+  for(let y=0;y<PH;y++)for(let x=0;x<PW;x++){ const c=O[y][x]; if(c){ctx.fillStyle=c;ctx.fillRect(x*PSC,y*PSC,PSC,PSC);} }
+  FX.forEach(([x,y,c])=>{ctx.fillStyle=c;ctx.fillRect(x*PSC,y*PSC,PSC,PSC);});
+}
+const live=[]; let tick=0;
+function animate(){
+  if(reduce) return;
+  setInterval(()=>{ tick++; live.forEach(s=>{ if(!s.cv.isConnected) return;
+    const blink=((tick+s.off)%24)===0;
+    if(s.chosen) drawPerson(s.cv,s.name,s.party,{blink,f:tick%NF,t:tick});
+    else if(blink||((tick+s.off)%24)===1) drawPerson(s.cv,s.name,s.party,{blink}); }); },150);
+}
+function sprite(party, name, crown, chosen){
+  const cv=document.createElement("canvas");
+  drawPerson(cv,name,party,chosen&&!reduce?{f:0}:{});
+  cv.setAttribute("aria-hidden","true");
+  live.push({cv,party,name,chosen,off:hash(name)%9});
+  return cv;
+}
+
+/* ---------------- HELPERS ---------------- */
+const $=s=>document.querySelector(s);
+const plabel=c=>c.label||({D:"DEM",R:"GOP",I:"IND"})[c.party];
+const pname=c=>c.label==="DFL"?"Democrat (DFL)":({D:"Democrat",R:"Republican",I:"Independent"})[c.party];
+const pickedCount=()=>RACES.filter(r=>picks[r.code]!=null).length;
+const lastName=n=>n==="Darline Graham Nordone"?"Graham Nordone":n==="Ben Ray Luján"?"Luján":n==="John E. Sununu"?"Sununu":n.split(" ").pop();
+function el(html){const t=document.createElement("template");t.innerHTML=html.trim();return t.content.firstElementChild;}
+const ARROW_L='<svg viewBox="0 0 6 8" aria-hidden="true"><path fill="#12141C" d="M4 0h2v8H4V7H3V6H2V5H1V3h1V2h1V1h1z"/></svg>';
+const ARROW_R='<svg viewBox="0 0 6 8" aria-hidden="true"><path fill="#12141C" d="M0 0h2v1h1v1h1v1h1v2H4v1H3v1H2v1H0z"/></svg>';
+const SPEAKER_ON='<svg width="14" height="14" viewBox="0 0 7 7" aria-hidden="true"><path fill="currentColor" d="M0 2h2V1h1V0h1v7H3V6H2V5H0zM5 2h1v3H5z"/></svg>';
+const SPEAKER_OFF='<svg width="14" height="14" viewBox="0 0 7 7" aria-hidden="true"><path fill="currentColor" d="M0 2h2V1h1V0h1v7H3V6H2V5H0z"/><path fill="currentColor" d="M5 2h1v1H5zM6 4h1v1H6zM5 4h1v1H5zM6 2h1v1H6z" opacity=".55"/></svg>';
+
+/* ---------------- HUD ---------------- */
+function renderHUD(){
+  renderStatus();
+  const pips=$("#pips"); pips.innerHTML="";
+  RACES.forEach((r,i)=>{
+    const p=picks[r.code]; const party=p!=null?r.cands[p].party:"";
+    const b=el(`<button class="pip ${party} ${view.screen==="race"&&view.i===i?"cur":""}" title="${r.name}${p!=null?": "+r.cands[p].name:""}">${r.code}</button>`);
+    b.setAttribute("aria-label",`${r.name}${p!=null?", picked "+r.cands[p].name:", no pick yet"}`);
+    if(view.screen==="race"&&view.i===i) b.setAttribute("aria-current","step");
+    b.onclick=()=>{SFX.nav();go("race",i);};
+    pips.appendChild(b);
+  });
+  $("#count").innerHTML=`<b>${pickedCount()}</b> of 16 picked`;
+  const sb=$("#soundBtn"); sb.innerHTML=(sound?SPEAKER_ON:SPEAKER_OFF)+`<span>${sound?"Sound on":"Sound off"}</span>`; sb.setAttribute("aria-pressed",String(sound));
+  const racing=view.screen==="race"||view.screen==="summary";
+  document.body.classList.toggle("racing",racing);
+  $("#mnav").hidden=!racing;
+  if(view.screen==="race"){ const r=RACES[view.i];
+    $("#mwhere").innerHTML=`<b style="color:var(--ink)">${r.code}</b> · ${view.i+1} of 16`;
+    $("#mprev").disabled=false; $("#mnext").hidden=false; $("#mnext").textContent=view.i===15?"Results ▶":"Next ▶"; }
+  else if(view.screen==="summary"){
+    $("#mwhere").innerHTML=`<b style="color:var(--ink)">Results</b>`;
+    $("#mprev").disabled=false; $("#mnext").hidden=true; }
+}
+
+/* ---------------- SCREENS ---------------- */
+function go(screen,i){ view={screen,i:i??view.i}; live.length=0; render(); window.scrollTo({top:0,behavior:reduce?"auto":"smooth"}); }
+
+function renderTitle(){
+  const n=pickedCount();
+  const s=el(`<section class="title">
+    <div class="copy">
+      <span class="px eyebrow">2026 midterms · 16 races · Nov 3</span>
+      <h1><span class="d">Senate</span><br><span class="r">Pick'em</span></h1>
+      <p>Call the most competitive Senate races of the cycle. Every matchup shows the latest polls, the polling average, Polymarket odds and a scouting report on each candidate.</p>
+      <div class="cta-row" id="ctas"></div>
+      <span class="keys">Races run from the widest polling margin to the closest. &nbsp;<kbd>◀</kbd> <kbd>▶</kbd> change state &nbsp;·&nbsp; <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick &nbsp;·&nbsp; picks save in this browser</span>
+    </div>
+    <div class="stage"><div class="ground" aria-hidden="true"></div><span class="px scenecap"><i></i>${BG.cap("US")}</span></div>
+  </section>`);
+  const st=s.querySelector(".stage");
+  [["D","Blue Knight"],["I","Gold Knight"],["R","Red Knight"]].forEach(([p,nm])=>{const w=el(`<div class="knight"></div>`); w.appendChild(sprite(p,nm,false,false)); st.appendChild(w);});
+  const ctas=s.querySelector("#ctas");
+  const add=(label,cls,fn)=>{const b=el(`<button class="btn ${cls}">${label}</button>`); b.onclick=fn; ctas.appendChild(b);};
+  if(n>0 && n<16){
+    const firstOpen=RACES.findIndex(r=>picks[r.code]==null);
+    add(`Continue <span class="px">${n}/16</span>`,"",()=>{SFX.start();go("race",firstOpen);});
+    add("Results so far","ghost",()=>{SFX.nav();go("summary");});
+  } else if(n===16){
+    add("See my Senate","",()=>{SFX.done();go("summary");});
+    add("Review picks","ghost",()=>{SFX.nav();go("race",0);});
+  } else {
+    add(`Start picking <span class="px">▶</span>`,"",()=>{SFX.start();go("race",0);});
+  }
+  return s;
+}
+
+function renderRace(i){
+  const r=RACES[i]; const p=picks[r.code]; const n=r.cands.length;
+  const s=el(`<section class="race">
+    <div class="race-head">
+      <span class="px stage-no">Race ${String(i+1).padStart(2,"0")} / 16 · Poll margin ${margin(r).toFixed(1)} pts</span>
+      <h1 class="state">${r.name} <span class="abbr">${r.code}</span></h1>
+      <div class="tagline">${r.tags.map(t=>`<span class="tag">${t.split(" ").map(w=>w.length<=2?w:w[0]+w.slice(1).toLowerCase()).join(" ")}</span>`).join("")}</div>
+      <p class="note">${r.note}</p>
+      <span class="px scenecap"><i></i>${BG.cap(r.code)}</span>
+    </div>
+    <div class="arena">
+      <button class="arrow prev" aria-label="${i===0?"Back to the start screen":"Previous state"}">${ARROW_L}</button>
+      <div class="split" style="--n:${n}"></div>
+      <button class="arrow next" aria-label="${i===15?"See results":"Next state"}">${ARROW_R}</button>
+    </div>
+    <p class="other">${r.other}</p>
+    <section class="board" aria-label="Poll board">
+      <div class="left"></div><div class="right"></div>
+    </section>
+  </section>`);
+
+  const S=s.querySelector(".split");
+  const heroes=[], scouts=[];
+  r.cands.forEach((c,ci)=>{
+    const chosen=p===ci, dim=p!=null&&!chosen;
+    const st=`col ${ci===0?"c0":""} ${c.party} ${chosen?"chosen":""} ${dim?"dim":""}`;
+    const on=Math.round(Math.min(100,r.odds[ci])/5);
+    const h=el(`<div class="hero ${st}">
+      ${chosen?'<span class="badge">Your pick</span>':""}
+      <div class="chips"><span class="chip">${pname(c)}</span>${c.inc?'<span class="chip out">Incumbent</span>':""}</div>
+      <div class="sprite"></div>
+      <h2>${c.name}</h2>
+      <div class="stats">
+        <div class="stat main"><span class="px k">Polling average</span><span class="v">${r.avg.v[ci].toFixed(1)}<small>%</small></span>
+          <div class="avgtrack" role="img" aria-label="Polling average ${r.avg.v[ci]} percent"><i style="width:${r.avg.v[ci]}%"></i><b></b></div>
+          <span class="lead">${avgLead(r,ci)}</span></div>
+        <div class="stat sub"><span class="px k">Polymarket</span>
+          <div class="segs" role="img" aria-label="Polymarket ${fmtOdds(r.odds[ci])} percent">${Array.from({length:20},(_,k)=>`<i class="${k<on?"on":""}"></i>`).join("")}</div>
+          <span class="v2">${fmtOdds(r.odds[ci])}%</span></div>
+      </div>
+      <button class="pick" aria-pressed="${chosen}" ${chosen?`aria-label="Picked ${c.name}. Remove pick"`:""}>${chosen?`<span class="on">Picked ✓</span><span class="off">Remove pick ✕</span>`:`Pick ${lastName(c.name)} <kbd>${ci+1}</kbd>`}</button>
+      ${chosen?`<span class="undo-hint">Tap again to remove your pick</span>`:""}
+    </div>`);
+    h.querySelector(".sprite").appendChild(sprite(c.party,c.name,!!c.inc,chosen));
+    h.querySelector(".pick").onclick=()=>choose(i,ci);
+    heroes.push(h);
+    scouts.push(el(`<div class="scout ${st}">
+      <span class="px">Scouting report · ${lastName(c.name)}</span>
+      <p class="bio">${c.bio}</p>
+      <ul class="pts">${c.pros.map(x=>`<li class="up"><span class="ic" aria-label="Strength">+</span><span>${x}</span></li>`).join("")}${c.cons.map(x=>`<li class="dn"><span class="ic" aria-label="Weakness">−</span><span>${x}</span></li>`).join("")}</ul>
+    </div>`));
+  });
+  heroes.forEach(h=>S.appendChild(h)); scouts.forEach(x=>S.appendChild(x));
+  if(n===2) S.appendChild(el(`<div class="vs" aria-hidden="true">VS</div>`));
+
+  s.querySelector(".prev").onclick=()=>step(-1);
+  s.querySelector(".next").onclick=()=>step(1);
+
+  const L=s.querySelector(".board .left"), R=s.querySelector(".board .right");
+  const other=Math.max(0,100-r.avg.v.reduce((a,b)=>a+b,0));
+  const lead=r.avg.v.indexOf(Math.max(...r.avg.v));
+  const second=[...r.avg.v].sort((a,b)=>b-a)[1];
+  L.appendChild(el(`<div><h3>Poll board</h3><span class="range">Polling average · ${r.avg.range}</span></div>`));
+  L.appendChild(el(`<div class="avgbar" role="img" aria-label="Polling average: ${r.cands.map((c,ci)=>lastName(c.name)+" "+r.avg.v[ci]+"%").join(", ")}">
+    ${r.cands.map((c,ci)=>`<span class="seg-${c.party}" style="width:${r.avg.v[ci]}%"></span>`).join("")}<span class="seg-O" style="width:${other}%"></span></div>`));
+  L.appendChild(el(`<div class="avglegend">${r.cands.map((c,ci)=>`<div class="${c.party}"><span>${lastName(c.name)}</span><b>${r.avg.v[ci].toFixed(1)}</b></div>`).join("")}
+    <div class="O"><span>Other / undecided</span><b>${other.toFixed(1)}</b></div></div>`));
+  L.appendChild(el(`<span class="lead-pill ${r.cands[lead].party}">${lastName(r.cands[lead].name)} +${(r.avg.v[lead]-second).toFixed(1)}</span>`));
+  L.appendChild(el(`<p class="avgnote">${r.avg.note||"270toWin polling average."}</p>`));
+  L.appendChild(el(`<a class="oddlink" href="${MARKET(r.code)}" target="_blank" rel="noopener">Open this race on Polymarket ↗</a>`));
+  R.appendChild(el(`<span class="px" style="color:var(--mute)">Latest polls</span>`));
+  R.appendChild(el(`<div class="tablewrap"><table>
+    <thead><tr><th class="px">Pollster</th><th class="px c-date">Date</th><th class="px c-sample">Sample</th>${r.cands.map(c=>`<th class="num px">${lastName(c.name)}</th>`).join("")}</tr></thead>
+    <tbody>${r.polls.map(pl=>{const mx=Math.max(...pl.v); const tie=pl.v.filter(v=>v===mx).length>1;
+      return `<tr><td class="who">${pl.p}${pl.rcp?" †":""}<span class="m">${pl.d} · ${pl.n||"sample n/a"}</span>${pl.x?`<span class="x">${pl.x}</span>`:""}</td><td class="dim c-date">${pl.d}</td><td class="dim c-sample">${pl.n||"n/a"}</td>
+      ${pl.v.map((v,ci)=>`<td class="num ${(!tie&&v===mx)?"lead "+r.cands[ci].party:""}"><span>${v}</span></td>`).join("")}</tr>`;}).join("")}</tbody></table></div>`));
+  return s;
+}
+
+function tallySeats(){
+  const t={R:BASE.R,D:BASE.D,I:0,U:0};
+  RACES.forEach(r=>{const p=picks[r.code]; if(p==null) t.U++; else t[r.cands[p].party]++;});
+  return t;
+}
+function verdict(t){
+  if(t.U>0) return {big:`${t.U} race${t.U>1?"s":""} left to call`, sub:"Finish your picks to see who controls the Senate."};
+  if(t.R>=51) return {big:"Republicans keep the Senate", sub:`A ${t.R}-seat majority.`};
+  if(t.R===50) return {big:"50–50 tie. VP Vance breaks it, and the GOP keeps control.", sub:"Every tie vote goes to the vice president."};
+  if(t.D>=51) return {big:"Democrats flip the Senate", sub:`A ${t.D}-seat majority${t.I?", with Osborn as an independent":""}.`};
+  return {big:"Hung Senate. Osborn holds the key.", sub:"Neither party reaches a majority without Nebraska's independent."};
+}
+function renderSummary(){
+  const t=tallySeats(); const v=verdict(t);
+  const s=el(`<section class="summary">
+    <div class="sumhead">
+      <button class="arrow back" id="sumBack" aria-label="Back to ${RACES[15].name}">${ARROW_L}</button>
+      <div><span class="px" style="color:var(--mute)">${t.U===0?"Game complete":"In progress"}</span><h1>Your Senate</h1></div>
+    </div>
+    <div class="verdict">
+      <p class="big">${v.big}</p>
+      <p class="sub">${v.sub}</p>
+      <div class="tally">
+        <div class="D"><span>Democrats</span><b>${t.D}</b></div>
+        <div class="R"><span>Republicans</span><b>${t.R}</b></div>
+        ${t.I?`<div class="I"><span>Independent</span><b>${t.I}</b></div>`:""}
+        ${t.U?`<div class="U"><span>Not picked</span><b>${t.U}</b></div>`:""}
+      </div>
+      <div class="seats" role="img" aria-label="${t.D} Democratic, ${t.I} independent, ${t.U} unpicked and ${t.R} Republican seats out of 100"></div>
+      <p class="fine">Counts the 65 senators not up this year and assumes the 19 races not in this game stay with the party that holds them now, which gives each side 42 seats before your picks. The 2 independents who caucus with Democrats are counted as Democrats.</p>
+    </div>
+    <div class="picks"></div>
+    <div class="cta-row">
+      <button class="btn" id="copyBtn" ${t.U?"disabled":""}>${t.U?`Copy my picks <span class="px">${16-t.U}/16</span>`:"Copy my picks"}</button>
+      <button class="btn ghost" id="editBtn">Edit picks</button>
+      <button class="btn ghost" id="resetBtn">Reset</button>
+    </div>
+    <textarea id="copyOut" readonly hidden aria-label="Your picks as text"></textarea>
+  </section>`);
+  const seats=s.querySelector(".seats");
+  const order=[...Array(t.D).fill("D"),...Array(t.I).fill("I"),...Array(t.U).fill(""),...Array(t.R).fill("R")];
+  order.forEach((p,k)=>seats.appendChild(el(`<span class="seat ${p} ${k===49||k===50?"mid":""}"></span>`)));
+  const PK=s.querySelector(".picks");
+  RACES.forEach((r,i)=>{
+    const p=picks[r.code]; const c=p!=null?r.cands[p]:null;
+    const b=el(`<button class="pcard ${c?c.party:"U"}"><span class="st px"><span>${r.code}</span><span>${c?plabel(c):"—"}</span></span><span class="nm">${c?lastName(c.name):"Not picked"}</span></button>`);
+    b.setAttribute("aria-label",`${r.name}: ${c?c.name:"not picked"}. Edit.`);
+    b.onclick=()=>{SFX.nav();go("race",i);}; PK.appendChild(b);
+  });
+  s.querySelector("#sumBack").onclick=()=>step(-1);
+  s.querySelector("#editBtn").onclick=()=>{SFX.nav();go("race",0);};
+  const rb=s.querySelector("#resetBtn"); let armed=false;
+  rb.onclick=()=>{ if(!armed){armed=true; rb.textContent="Tap again to erase"; setTimeout(()=>{armed=false; if(rb.isConnected) rb.textContent="Reset";},3000); return;}
+    picks={}; save(); SFX.nav(); go("title"); };
+  if(t.U) s.querySelector("#copyBtn").title=`Pick all 16 races to copy your picks (${t.U} left)`;
+  s.querySelector("#copyBtn").onclick=async()=>{
+    if(tallySeats().U) return;
+    const DOT={D:"🔵",R:"🔴",I:"🟡"};
+    const line=RACES.map(r=>{const p=picks[r.code];return `${r.code}: ${p!=null?DOT[r.cands[p].party]:"⚪"}`;}).join(", ");
+    const txt=`Senate Pick'em -- Midterms 2026\n\n${line}`;
+    const btn=s.querySelector("#copyBtn");
+    try{ await navigator.clipboard.writeText(txt); btn.textContent="Copied ✓"; }
+    catch(e){ const ta=s.querySelector("#copyOut"); ta.hidden=false; ta.value=txt; ta.focus(); ta.select(); btn.textContent="Selected. Copy it"; }
+    setTimeout(()=>{ if(btn.isConnected) btn.textContent="Copy my picks"; },2500);
+  };
+  return s;
+}
+
+/* ---------------- ACTIONS ---------------- */
+let advanceTimer=null;
+function choose(i,ci){
+  const r=RACES[i];
+  if(picks[r.code]===ci){ delete picks[r.code]; save(); SFX.nav(); clearTimeout(advanceTimer); live.length=0; render(); return; }
+  picks[r.code]=ci; save(); SFX.pick();
+  clearTimeout(advanceTimer); live.length=0; render();
+}
+function step(d){
+  clearTimeout(advanceTimer);
+  if(view.screen==="summary"){ if(d<0){ SFX.nav(); go("race",15); } return; }
+  const n=view.i+d;
+  if(n<0){ SFX.nav(); go("title"); return; }
+  if(n>15){ SFX.done(); go("summary"); return; }
+  SFX.nav(); go("race",n);
+}
+function render(){
+  BG.set(view.screen==="race"?RACES[view.i].code:"US");
+  const m=$("#screen"); m.innerHTML="";
+  if(view.screen==="title") m.appendChild(renderTitle());
+  else if(view.screen==="race") m.appendChild(renderRace(view.i));
+  else m.appendChild(renderSummary());
+  renderHUD();
+}
+
+/* ---------------- BOOT ---------------- */
+(function logoFlag(){ const cv=$("#logoFlag"), c=cv.getContext("2d");
+  for(let y=0;y<6;y++) for(let x=0;x<8;x++){ c.fillStyle = (x<3&&y<3) ? ((x+y)%2?"#FFFFFF":"#2152E0") : (y%2?"#FFFFFF":"#DC2F3A"); c.fillRect(x,y,1,1); } })();
+$("#homeBtn").onclick=()=>{SFX.nav();go("title");};
+$("#soundBtn").onclick=()=>{ sound=!sound; try{localStorage.setItem(SKEY,sound?"on":"off");}catch(e){} renderHUD(); if(sound) SFX.nav(); };
+$("#mprev").onclick=()=>step(-1);
+$("#mnext").onclick=()=>step(1);
+document.addEventListener("keydown",e=>{
+  if(e.target.closest && e.target.closest("textarea,input")) return;
+  if(view.screen==="race"){
+    if(e.key==="ArrowRight"){e.preventDefault();step(1);}
+    else if(e.key==="ArrowLeft"){e.preventDefault();step(-1);}
+    else if(/^[1-3]$/.test(e.key)){const ci=+e.key-1; if(ci<RACES[view.i].cands.length) choose(view.i,ci);}
+  } else if(view.screen==="summary" && e.key==="ArrowLeft"){
+    e.preventDefault(); step(-1);
+  } else if(view.screen==="title" && e.key==="ArrowRight"){
+    e.preventDefault(); SFX.start(); go("race",0);
+  } else if(view.screen==="title" && (e.key==="Enter"||e.key===" ") && document.activeElement===document.body){
+    e.preventDefault(); const first=RACES.findIndex(r=>picks[r.code]==null); SFX.start(); go(first<0?"summary":"race",Math.max(0,first));
+  }
+});
+render(); animate(); loadLive();
+</script>
+
+</body>
+</html>
