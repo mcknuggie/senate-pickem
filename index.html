@@ -326,6 +326,7 @@ footer{background:rgba(255,255,255,.46);backdrop-filter:blur(6px) saturate(1.15)
 .mute-strong,.avgnote,.range,.stage-no,.scenecap,.stat .k{color:#4A4F62}
 </style>
 
+<script data-goatcounter="https://senatepicks.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <canvas id="scene" aria-hidden="true"></canvas>
@@ -349,6 +350,7 @@ footer{background:rgba(255,255,255,.46);backdrop-filter:blur(6px) saturate(1.15)
     <p>Polls: <a href="https://pollresults.org/" target="_blank" rel="noopener">PollResults.org</a> (data from The New York Times polls page, CC BY 4.0), loaded live each time the game opens. Polling averages are calculated here: the latest poll from each pollster in the three weeks before the newest poll.</p>
     <p>Odds: <a href="https://polymarket.us/midterms" target="_blank" rel="noopener">Polymarket US</a>, loaded live. Each figure is the midpoint between the current buy and sell price, roughly the market's implied chance of winning. If live data can't be reached, the game shows a snapshot from Oct 21, 2026.</p>
     <p>Nominees: <a href="https://clerk.house.gov/member_info/electionInfo/2026/120-nominations.pdf" target="_blank" rel="noopener">Office of the Clerk, U.S. House</a> (Oct 8, 2026). Candidate notes summarize public reporting and Wikipedia race pages and were written in October 2026. Candidate characters are 16-bit caricatures drawn from public photos (mostly Wikipedia portraits). They are approximate, drawn in one shared style, and not endorsed by any campaign.</p>
+    <p>This site counts anonymous visits with <a href="https://www.goatcounter.com/" target="_blank" rel="noopener">GoatCounter</a>: no cookies, and your picks stay in your browser.</p>
     <p>Just a game. To check your registration or find where to vote, go to <a href="https://vote.gov" target="_blank" rel="noopener">vote.gov</a>.</p>
   </footer>
 </div>
@@ -1418,7 +1420,17 @@ function renderHUD(){
 }
 
 /* ---------------- SCREENS ---------------- */
-function go(screen,i){ view={screen,i:i??view.i}; live.length=0; render(); window.scrollTo({top:0,behavior:reduce?"auto":"smooth"}); }
+/* ---------------- ANALYTICS (GoatCounter, anonymous events only; never records which candidate anyone picks) ---------------- */
+const GC_SENT=new Set();
+function gcEvent(name,once){
+  if(once&&GC_SENT.has(name)) return; GC_SENT.add(name);
+  const send=()=>{try{window.goatcounter.count({path:"event/"+name,title:name,event:true});}catch(e){}};
+  if(window.goatcounter&&window.goatcounter.count) send();
+  else { let n=0; const t=setInterval(()=>{ if(window.goatcounter&&window.goatcounter.count){clearInterval(t);send();} else if(++n>20) clearInterval(t); },500); }
+}
+function go(screen,i){ const from=view.screen; view={screen,i:i??view.i}; live.length=0; render(); window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
+  if(screen==="race"){ if(from==="title") gcEvent("started",true); gcEvent("state-"+RACES[view.i].code,true); }
+  else if(screen==="summary") gcEvent(pickedCount()===16?"results-complete":"results-partial",true); }
 
 function renderTitle(){
   const n=pickedCount();
@@ -1589,7 +1601,7 @@ function renderSummary(){
     const line=RACES.map(r=>{const p=picks[r.code];return `${r.code}: ${p!=null?DOT[r.cands[p].party]:"⚪"}`;}).join(", ");
     const txt=`Senate Pick'em -- Midterms 2026\n\n${line}`;
     const btn=s.querySelector("#copyBtn");
-    try{ await navigator.clipboard.writeText(txt); btn.textContent="Copied ✓"; }
+    try{ await navigator.clipboard.writeText(txt); btn.textContent="Copied ✓"; gcEvent("copied-picks",true); }
     catch(e){ const ta=s.querySelector("#copyOut"); ta.hidden=false; ta.value=txt; ta.focus(); ta.select(); btn.textContent="Selected. Copy it"; }
     setTimeout(()=>{ if(btn.isConnected) btn.textContent="Copy my picks"; },2500);
   };
@@ -1601,7 +1613,7 @@ let advanceTimer=null;
 function choose(i,ci){
   const r=RACES[i];
   if(picks[r.code]===ci){ delete picks[r.code]; save(); SFX.nav(); clearTimeout(advanceTimer); live.length=0; render(); return; }
-  picks[r.code]=ci; save(); SFX.pick();
+  picks[r.code]=ci; save(); SFX.pick(); if(pickedCount()===16) gcEvent("picked-all-16",true);
   clearTimeout(advanceTimer); live.length=0; render();
 }
 function step(d){
